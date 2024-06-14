@@ -326,7 +326,7 @@ public class Display {
             int count = 0;
             int l = result.response.basicDetails.length;
             while(j < l){
-                if(result.response.basicDetails[j].statusCode.equals("Pending_Appointment")){
+                if(result.response.basicDetails[j].statusCode.equals("Pending_Appointment") || result.response.basicDetails[j].statusCode.equals("Expired")){
                     System.out.println("Application ID: " + result.response.basicDetails[j].preRegistrationId);
                     System.out.println("Full Name: " + result.response.basicDetails[j].demographicMetadata.fullName[0].value);
                     System.out.println("Status: " + result.response.basicDetails[j].statusCode);
