@@ -20,6 +20,7 @@ public class App
 
         if (resp.equals("")) {
             System.err.println("Invalid OTP!");
+            System.out.println("------------------------------");
             System.exit(0);
         }
 
