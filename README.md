@@ -1,5 +1,5 @@
 # mosip_pre-reg
- The command line version of [MOSIP's pre-registration website](https://github.com/darshveer/mosip_pre-reg).
+ The command line version of [MOSIP's pre-registration website](https://uat2.mosip.net/pre-registration-ui/#/eng).
 
 # How to run
 ## METHOD 1:
