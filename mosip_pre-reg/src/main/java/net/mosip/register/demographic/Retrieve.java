@@ -33,7 +33,7 @@ public class Retrieve {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataRetrieve result = objectMapper.readValue(responseBody, ResponseDataRetrieve.class);
 
-        System.out.println(responseBody);
+        //System.out.println(responseBody);
 
         if (result.errors == null){
             System.out.println("Please Check your details: ");
