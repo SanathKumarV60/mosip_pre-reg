@@ -42,9 +42,9 @@ public class envManager {
         File envFile = new File(ENV_FILE_PATH);
 		if (!envFile.exists()) {
             if (envFile.createNewFile()) {
-                System.out.println(".env file created successfully.");
+                //System.out.println(".env file created successfully.");
             } else {
-                System.err.println("Error creating .env file.");
+                //System.err.println("Error creating .env file.");
             }
         }
 
