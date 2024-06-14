@@ -53,6 +53,7 @@ public class Validate {
         else{
             System.err.println("ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!");
             System.out.println("------------------------------");
+            return "";
         }
 
         return response.body().string();
