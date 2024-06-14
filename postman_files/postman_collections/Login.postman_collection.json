@@ -1,0 +1,285 @@
+{
+	"info": {
+		"_postman_id": "685e6e79-264d-4af6-ad84-6fdb6024c653",
+		"name": "Login",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34884075"
+	},
+	"item": [
+		{
+			"name": "config.json",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var template = `",
+							"<canvas id=\"myChart\" height=\"75\"></canvas>",
+							"",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script> ",
+							"",
+							"<script>",
+							"    var ctx = document.getElementById(\"myChart\");",
+							"",
+							"    var myChart = new Chart(ctx, {",
+							"        type: \"bar\",",
+							"        data: {",
+							"            labels: [\"Status\"],",
+							"            datasets: [{",
+							"                data: [200],",
+							"                ",
+							"                // Change these colours to customize the chart",
+							"                backgroundColor: [\"#003f5c\", \"#58508d\", \"#bc5090\", \"#ff6361\", \"#ffa600\"],",
+							"            }]",
+							"        },",
+							"        options: {",
+							"            legend: { display: false },",
+							"            title: {",
+							"                display: true,",
+							"                text: 'HTTP Status Code'",
+							"            },",
+							"            scales: {",
+							"                xAxes: [{",
+							"                    display: true,",
+							"                    scaleLabel: {",
+							"                        display: true,",
+							"                        labelString: 'Status'",
+							"                    }",
+							"                }],",
+							"                yAxes: [{",
+							"                    display: true,",
+							"                    scaleLabel: {",
+							"                        display: true,",
+							"                        labelString: 'Count'",
+							"                    }",
+							"                }]",
+							"            }",
+							"        }",
+							"",
+							"    });",
+							"",
+							"    // Access the data passed to pm.visualizer.set() from the JavaScript",
+							"    // code of the Visualizer template",
+							"    pm.getData(function (err, value) {",
+							"        myChart.data.datasets[0].data = value.response.data;",
+							"        myChart.data.labels = value.response.labels;",
+							"        myChart.update();",
+							"    });",
+							"",
+							"</script>`;",
+							"function constructVisualizerPayload() {",
+							"    var visualizerData = {",
+							"        // Labels take an array of strings",
+							"        labels: [\"Status\"],",
+							"        // Data takes an array of numbers",
+							"        data: [200]",
+							"    };",
+							"",
+							"    return {response: visualizerData};",
+							"}",
+							"",
+							"pm.visualizer.set(template, constructVisualizerPayload());"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat2.mosip.net/pre-registration-ui/assets/config.json",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"pre-registration-ui",
+						"assets",
+						"config.json"
+					]
+				},
+				"description": "Load homepage"
+			},
+			"response": []
+		},
+		{
+			"name": "eng.json",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://uat2.mosip.net/pre-registration-ui/assets/i18n/eng.json",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"pre-registration-ui",
+						"assets",
+						"i18n",
+						"eng.json"
+					]
+				},
+				"description": "Load language"
+			},
+			"response": []
+		},
+		{
+			"name": "config",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://uat2.mosip.net//preregistration/v1/login/config",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"",
+						"preregistration",
+						"v1",
+						"login",
+						"config"
+					]
+				},
+				"description": "Take values from user"
+			},
+			"response": []
+		},
+		{
+			"name": "sendOtpWithCaptcha",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var moment = require('moment');\r",
+							"\r",
+							"pm.environment.set('time', moment());"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"mosip.pre-registration.login.sendotp\",\r\n    \"request\": {\r\n        \"langCode\": \"eng\",\r\n        \"userId\": \"{{userId}}\",\r\n        \"captchaToken\": null\r\n    },\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"{{time}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat2.mosip.net//preregistration/v1/login/sendOtpWithCaptcha",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"",
+						"preregistration",
+						"v1",
+						"login",
+						"sendOtpWithCaptcha"
+					]
+				},
+				"description": "Set OTP with cookie for auth"
+			},
+			"response": []
+		},
+		{
+			"name": "validateOtp",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"mosip.pre-registration.login.useridotp\",\r\n    \"request\": {\r\n        \"otp\": \"111111\",\r\n        \"userId\": \"{{userId}}\"\r\n    },\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"{{time}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat2.mosip.net//preregistration/v1/login/validateOtp",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"",
+						"preregistration",
+						"v1",
+						"login",
+						"validateOtp"
+					]
+				},
+				"description": "Verify OTP"
+			},
+			"response": []
+		}
+	]
+}

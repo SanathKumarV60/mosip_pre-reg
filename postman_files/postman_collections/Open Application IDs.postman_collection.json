@@ -1,0 +1,158 @@
+{
+	"info": {
+		"_postman_id": "f6a3b3f5-7e9a-45b2-b128-9d37ecbf6c02",
+		"name": "Open Application IDs",
+		"description": "1. **Get list of open application IDs associated with the given login credentials.**",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34884075"
+	},
+	"item": [
+		{
+			"name": "eng.json",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://uat2.mosip.net/pre-registration-ui/assets/i18n/eng.json",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"pre-registration-ui",
+						"assets",
+						"i18n",
+						"eng.json"
+					]
+				},
+				"description": "Load language"
+			},
+			"response": []
+		},
+		{
+			"name": "applications",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"let i = 0;\r",
+							"\r",
+							"if(jsonData.response.totalRecords == \"0\"){\r",
+							"    console.log(\"NO RECORDS FOUND!\");\r",
+							"    return;\r",
+							"}\r",
+							"else{\r",
+							"    console.log(\"Number of Records: \", jsonData.response.totalRecords);\r",
+							"}\r",
+							"console.log(\"-------------------------\")\r",
+							"\r",
+							"while(i < jsonData.response.basicDetails.length){\r",
+							"    console.log(\"Pre Registration ID: \", jsonData.response.basicDetails[i].preRegistrationId);\r",
+							"    console.log(\"Status Code: \", jsonData.response.basicDetails[i].statusCode);\r",
+							"    console.log(\"Postal Code: \", jsonData.response.basicDetails[i].demographicMetadata.postalCode);\r",
+							"    if(jsonData.response.basicDetails[i].demographicMetadata.proofOfAddress == null){\r",
+							"        console.log(\"No POA given!\")\r",
+							"    }\r",
+							"    console.log(\"-------------------------\");\r",
+							"\r",
+							"    i++;\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "addTokenTo",
+							"value": "queryParam",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "{eyJzdWIiOiJkYXJzaEBhYmMuY29tIiwiYXVkIjoiYWNjb3VudCIsInVzZXJfbmFtZSI6ImRhcnNoQGFiYy5jb20iLCJzY29wZSI6IlBSRS1SRUdJU1RSQVRJT04iLCJyb2xlcyI6IklORElWSURVQUwiLCJpc3MiOiIvcHJlcmVnaXN0cmF0aW9uL3YxL2xvZ2luL3ZhbGlkYXRlT3RwIiwiZXhwIjoxNzE1OTQwMDYyLCJ1c2VySWQiOiJkYXJzaEBhYmMuY29tIiwiaWF0IjoxNzE1OTM2NDYyfQ\r\n}",
+							"type": "string"
+						},
+						{
+							"key": "header",
+							"value": "{eyJhbGciOiJIUzI1NiJ9}",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://uat2.mosip.net//preregistration/v1/applications",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"",
+						"preregistration",
+						"v1",
+						"applications"
+					]
+				},
+				"description": "Display all applications with the login credentials."
+			},
+			"response": []
+		},
+		{
+			"name": "config",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://uat2.mosip.net//preregistration/v1/login/config",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"",
+						"preregistration",
+						"v1",
+						"login",
+						"config"
+					]
+				},
+				"description": "Take values from user"
+			},
+			"response": []
+		}
+	]
+}

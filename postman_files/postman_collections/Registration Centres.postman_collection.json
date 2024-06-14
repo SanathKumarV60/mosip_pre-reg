@@ -1,0 +1,1683 @@
+{
+	"info": {
+		"_postman_id": "28e91d88-33cf-4c05-a72e-2f3f6d39f216",
+		"name": "Registration Centres",
+		"description": "**2) Get list of registration centers associated with a given location  \n3) Get list of available time slots for a given date and registration center  \n4) Book a time slot for a given Application ID, registration center, date, time slot**",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34884075"
+	},
+	"item": [
+		{
+			"name": "Demographic Details",
+			"item": [
+				{
+					"name": "eng.json",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net/pre-registration-ui/assets/i18n/eng.json",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"pre-registration-ui",
+								"assets",
+								"i18n",
+								"eng.json"
+							]
+						},
+						"description": "Load language"
+					},
+					"response": []
+				},
+				{
+					"name": "config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/login/config",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"login",
+								"config"
+							]
+						},
+						"description": "Take values from user"
+					},
+					"response": []
+				},
+				{
+					"name": "formPage1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net/preregistration/v1//proxy/masterdata/dynamicfields?pageNumber=0&pageSize=10",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"dynamicfields"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "0"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "consent",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/templates/eng/consent",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"templates",
+								"eng",
+								"consent"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Get all Regions)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"let found = false;\r",
+									"let i = 0;\r",
+									"\r",
+									"while(!found && i < jsonData.response.locations.length){\r",
+									"    if(jsonData.response.locations[i].isActive){\r",
+									"        found = true;\r",
+									"        pm.environment.set(\"region\", jsonData.response.locations[i].code);\r",
+									"    }\r",
+									"    i++;\r",
+									"}\r",
+									"if(!found){\r",
+									"    pm.environment.set(\"region\", null);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/MOR/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"immediatechildren",
+								"MOR",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Get all Provinces in Region)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"let found = false;\r",
+									"let i = 0;\r",
+									"let region = pm.environment.get(\"region\");\r",
+									"\r",
+									"while(!found && i < jsonData.response.locations.length){\r",
+									"    if(jsonData.response.locations[i].isActive && jsonData.response.locations[i].parentLocCode == region){\r",
+									"        found = true;\r",
+									"        pm.environment.set(\"province\", jsonData.response.locations[i].code);\r",
+									"    }\r",
+									"    i++;\r",
+									"}\r",
+									"if(!found){\r",
+									"    pm.environment.set(\"province\", null);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/{{region}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"immediatechildren",
+								"{{region}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Get all Cities in a Province)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"let found = false;\r",
+									"let i = 0;\r",
+									"let province = pm.environment.get(\"province\");\r",
+									"\r",
+									"while(!found && i < jsonData.response.locations.length){\r",
+									"    if(jsonData.response.locations[i].isActive && jsonData.response.locations[i].parentLocCode == province){\r",
+									"        found = true;\r",
+									"        pm.environment.set(\"city\", jsonData.response.locations[i].code);\r",
+									"    }\r",
+									"    i++;\r",
+									"}\r",
+									"if(!found){\r",
+									"    pm.environment.set(\"city\", null);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/{{province}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"immediatechildren",
+								"{{province}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Get all Zones in a City)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"let found = false;",
+									"let i = 0;",
+									"let city = pm.environment.get(\"city\");",
+									"",
+									"while(!found && i < jsonData.response.locations.length){",
+									"    if(jsonData.response.locations[i].isActive && jsonData.response.locations[i].parentLocCode == city){",
+									"        found = true;",
+									"        pm.environment.set(\"zone\", jsonData.response.locations[i].code);",
+									"    }",
+									"    i++;",
+									"}",
+									"if(!found){",
+									"    pm.environment.set(\"zone\", null);",
+									"}",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/{{city}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"immediatechildren",
+								"{{city}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Get Postal Code of Zone)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"let found = false;\r",
+									"let i = 0;\r",
+									"let zone = pm.environment.get(\"zone\");\r",
+									"\r",
+									"pm.environment.set(\"pincode\", jsonData.response.locations[0].code);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/{{zone}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"immediatechildren",
+								"{{zone}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "applications (make Application ID)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.environment.set(\"applicationId\", jsonData.response.preRegistrationId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"mosip.pre-registration.demographic.create\",\r\n    \"request\": {\r\n        \"langCode\": \"eng\",\r\n        \"demographicDetails\": {\r\n            \"identity\": {\r\n                \"IDSchemaVersion\": 0.1,\r\n                \"fullName\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"{{name}}\"\r\n                    }\r\n                ],\r\n                \"dateOfBirth\": \"{{dob}}\",\r\n                \"gender\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"{{gender}}\"\r\n                    }\r\n                ],\r\n                \"residenceStatus\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"{{residenceStat}}\"\r\n                    }\r\n                ],\r\n                \"addressLine1\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"{{addressLine}}\"\r\n                    }\r\n                ],\r\n                \"region\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"{{region}}\"\r\n                    }\r\n                ],\r\n                \"province\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"{{province}}\"\r\n                    }\r\n                ],\r\n                \"city\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"{{city}}\"\r\n                    }\r\n                ],\r\n                \"zone\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"{{zone}}\"\r\n                    }\r\n                ],\r\n                \"postalCode\": \"{{pincode}}\",\r\n                \"phone\": \"{{phoneNumber}}\",\r\n                \"email\": \"{{email}}\"\r\n            }\r\n        }\r\n    },\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"{{time}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/applications",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"applications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "formPage2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net/preregistration/v1//proxy/masterdata/dynamicfields?pageNumber=1&pageSize=10",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"dynamicfields"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Part 1 of Application"
+		},
+		{
+			"name": "Upload Document",
+			"item": [
+				{
+					"name": "{{applicationId}} (Retrieve Application Details)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/applications/{{applicationId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"applications",
+								"{{applicationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "applications",
+					"request": {
+						"auth": {
+							"type": "jwt",
+							"jwt": [
+								{
+									"key": "addTokenTo",
+									"value": "queryParam",
+									"type": "string"
+								},
+								{
+									"key": "payload",
+									"value": "{eyJzdWIiOiJkYXJzaEBhYmMuY29tIiwiYXVkIjoiYWNjb3VudCIsInVzZXJfbmFtZSI6ImRhcnNoQGFiYy5jb20iLCJzY29wZSI6IlBSRS1SRUdJU1RSQVRJT04iLCJyb2xlcyI6IklORElWSURVQUwiLCJpc3MiOiIvcHJlcmVnaXN0cmF0aW9uL3YxL2xvZ2luL3ZhbGlkYXRlT3RwIiwiZXhwIjoxNzE1OTQwMDYyLCJ1c2VySWQiOiJkYXJzaEBhYmMuY29tIiwiaWF0IjoxNzE1OTM2NDYyfQ\r\n}",
+									"type": "string"
+								},
+								{
+									"key": "header",
+									"value": "{eyJhbGciOiJIUzI1NiJ9}",
+									"type": "string"
+								},
+								{
+									"key": "algorithm",
+									"value": "HS256",
+									"type": "string"
+								},
+								{
+									"key": "isSecretBase64Encoded",
+									"value": false,
+									"type": "boolean"
+								},
+								{
+									"key": "headerPrefix",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "queryParamKey",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/applications",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"applications"
+							]
+						},
+						"description": "Display all applications with the login credentials."
+					},
+					"response": []
+				},
+				{
+					"name": "{{applicationID}} (Document Fetch)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/documents/preregistration/{{applicationId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"documents",
+								"preregistration",
+								"{{applicationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getApplicantType",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.environment.set(\"applicantType\", jsonData.response.applicantType.applicantTypeCode);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"mosip.applicanttype.fetch\",\r\n    \"request\": {\r\n        \"attributes\": [\r\n            {\r\n                \"attribute\": \"individualTypeCode\",\r\n                \"value\": \"{{residenceStat}}\"\r\n            },\r\n            {\r\n                \"attribute\": \"dateofbirth\",\r\n                \"value\": \"2005-08-31T11:46:12.640Z\"\r\n            },\r\n            {\r\n                \"attribute\": \"genderCode\",\r\n                \"value\": \"{{gender}}\"\r\n            },\r\n            {\r\n                \"attribute\": \"biometricAvailable\",\r\n                \"value\": false\r\n            }\r\n        ]\r\n    },\r\n    \"metadata\": {},\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"{{time}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/getApplicantType",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"getApplicantType"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "languages?languages=eng",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net/preregistration/v1//proxy/masterdata/applicanttype/{{applicantType}}/languages?languages=eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"applicanttype",
+								"{{applicantType}}",
+								"languages"
+							],
+							"query": [
+								{
+									"key": "languages",
+									"value": "eng"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{applicationID}} (POI)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.environment.set(\"POIdocId\", jsonData.response.docId);\r",
+									"pm.environment.set(\"POIdocRefId\", jsonData.response.docRefId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Document request",
+									"value": "{\"id\":\"mosip.pre-registration.document.upload\",\"request\":{\"docCatCode\":\"POI\",\"docTypCode\":\"{{POIdocType}}\",\"langCode\":\"eng\",\"docRefId\":\"{{POIdocRefId}}\"},\"metadata\":{},\"version\":\"1.0\",\"requesttime\":\"{{time}}\"}\n",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "postman-cloud:///1ef1cc1e-3e58-4370-8e90-b839d8940b4f"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/documents/{{applicationId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"documents",
+								"{{applicationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{POIdocID}} (Make any changes to POI)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net/preregistration/v1/documents/document/{{POIdocId}}?preRegistrationId={{applicationId}}&docRefId={{POIdocRefId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"documents",
+								"document",
+								"{{POIdocId}}"
+							],
+							"query": [
+								{
+									"key": "preRegistrationId",
+									"value": "{{applicationId}}"
+								},
+								{
+									"key": "docRefId",
+									"value": "{{POIdocRefId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{applicationID}} (POA)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.environment.set(\"POAdocId\", jsonData.response.docId);\r",
+									"pm.environment.set(\"POAdocRefId\", jsonData.response.docRefId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Document request",
+									"value": "{\"id\":\"mosip.pre-registration.document.upload\",\"request\":{\"docCatCode\":\"POA\",\"docTypCode\":\"{{POAdocType}}\",\"langCode\":\"eng\",\"docRefId\":\"{{POAdocRefId}}\"},\"metadata\":{},\"version\":\"1.0\",\"requesttime\":\"{{time}}\"}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "postman-cloud:///1ef1cc3c-bcbb-4460-8546-135755d7242d"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/documents/{{applicationId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"documents",
+								"{{applicationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{POAdocID}} (Make any changes to POI) Copy",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net/preregistration/v1/documents/document/{{POIdocId}}?preRegistrationId={{applicationId}}&docRefId={{POIdocRefId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"documents",
+								"document",
+								"{{POIdocId}}"
+							],
+							"query": [
+								{
+									"key": "preRegistrationId",
+									"value": "{{applicationId}}"
+								},
+								{
+									"key": "docRefId",
+									"value": "{{POIdocRefId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "dynamicfields?pageNumber=0&pageSize=10",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net/preregistration/v1//proxy/masterdata/dynamicfields?pageNumber=0&pageSize=10",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"dynamicfields"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "0"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "dynamicfields?pageNumber=1&pageSize=10",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net/preregistration/v1//proxy/masterdata/dynamicfields?pageNumber=1&pageSize=10",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"dynamicfields"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{applicationId}} (Retrieve Application Details)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/applications/{{applicationId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"applications",
+								"{{applicationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{applicationID}} (Document Fetch)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/documents/preregistration/{{applicationId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"documents",
+								"preregistration",
+								"{{applicationId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Part 2 of Application"
+		},
+		{
+			"name": "Book Appointment",
+			"item": [
+				{
+					"name": "eng (Info on Region)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/info/{{region}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"info",
+								"{{region}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Info on Province)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/info/{{province}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"info",
+								"{{province}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Info on City)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/info/{{city}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"info",
+								"{{city}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Info on Zone)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/info/{{zone}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"info",
+								"{{zone}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Location Master Data)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Data on PinCode)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/info/{{pincode}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"locations",
+								"info",
+								"{{pincode}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "names?name={{pincode}}",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"let i = 0;\r",
+									"let found = false;\r",
+									"\r",
+									"while(i < jsonData.response.registrationCenters.length){\r",
+									"    if(jsonData.response.registrationCenters[i].isActive){\r",
+									"        pm.environment.set(\"regCenterId\", jsonData.response.registrationCenters[i].id);\r",
+									"        console.log(\"ID: \", jsonData.response.registrationCenters[i].id);\r",
+									"        console.log(\"Name: \", jsonData.response.registrationCenters[i].name);\r",
+									"        console.log(\"Contact Person: \", jsonData.response.registrationCenters[i].contactPerson);\r",
+									"        console.log(\"Phone: \", jsonData.response.registrationCenters[i].contactPhone);\r",
+									"        console.log(\"-------------------------\")\r",
+									"        found = true;\r",
+									"    }\r",
+									"    i++;\r",
+									"}\r",
+									"if(!found){\r",
+									"    pm.environment.set(\"regCenterId\", null);\r",
+									"}\r",
+									"else{\r",
+									"    console.log(\"Number of Registration Centres Available: \", i);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net/preregistration/v1//proxy/masterdata/registrationcenters/eng/5/names?name={{pincode}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"registrationcenters",
+								"eng",
+								"5",
+								"names"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "{{pincode}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Working Days for Centre Chosen)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"let i = 0;\r",
+									"console.log(\"WORKING DAYS:\")\r",
+									"console.log(\"_________________________\")\r",
+									"\r",
+									"while(i < jsonData.response.workingdays.length){\r",
+									"    console.log(jsonData.response.workingdays[i].name);\r",
+									"    i++;\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/workingdays/{{regCenterId}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"workingdays",
+								"{{regCenterId}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Registration Center Data)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/{{regCenterId}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"registrationcenters",
+								"{{regCenterId}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{regCenterId}} (Available Time Slots)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"let x = jsonData.response;\r",
+									"\r",
+									"/*TO GET ALL AVAILABLE TIME SLOTS, RUN BELOW*/\r",
+									"/*for(i = 0; i < jsonData.response.centerDetails.length; i++){\r",
+									"    if(x.centreDetails[i].holiday){\r",
+									"        console.log(\"This Day is a Holiday!\");\r",
+									"        console.log(\"____________________________\");\r",
+									"    }\r",
+									"    console.log(\"Date: \", jsonData.response.centerDetails[i].date);\r",
+									"\r",
+									"    let l = jsonData.response.centerDetails[i].timeSlots.length;\r",
+									"    if(l == 0){\r",
+									"        console.log(\"No Available Time Slots on this day!\");\r",
+									"        console.log(\"____________________________\");\r",
+									"        continue;\r",
+									"    }\r",
+									"\r",
+									"    for(j = 0; j < l; j++){\r",
+									"        console.log(\"From Time: \", x.centerDetails[i].timeSlots[j].fromTime);\r",
+									"        console.log(\"To Time: \", x.centerDetails[i].timeSlots[j].toTime);\r",
+									"        console.log(\"Availability: \", x.centerDetails[i].timeSlots[j].availability);\r",
+									"        console.log(\"-------------------------\");\r",
+									"    }\r",
+									"    console.log(\"____________________________\");\r",
+									"}*/\r",
+									"\r",
+									"/*RUN BELOW CODE FOR SPECIFIC DATE (Change in env)*/\r",
+									"let found = 0;\r",
+									"let dateReq = pm.environment.get(\"dateReq\");\r",
+									"\r",
+									"for(i = 0; i < x.centerDetails.length; i++){\r",
+									"    if(x.centerDetails[i].date == dateReq){\r",
+									"        console.log(\"Date Requested: \", dateReq);\r",
+									"        console.log(\"____________________________\")\r",
+									"        found = true;\r",
+									"\r",
+									"        for(j = 0; j < x.centerDetails[i].timeSlots.length; j++){\r",
+									"            console.log(\"From Time: \", x.centerDetails[i].timeSlots[j].fromTime);\r",
+									"            console.log(\"To Time: \", x.centerDetails[i].timeSlots[j].toTime);\r",
+									"            console.log(\"Availability: \", x.centerDetails[i].timeSlots[j].availability);\r",
+									"            console.log(\"-------------------------\");\r",
+									"        }\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"if(!found){\r",
+									"    console.log(\"Date not Available!\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/appointment/availability/{{regCenterId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"appointment",
+								"availability",
+								"{{regCenterId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "appointment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"let x = jsonData.response;\r",
+									"\r",
+									"let dateReq = pm.environment.get(\"dateReq\");\r",
+									"let fromTime = pm.environment.get(\"fromTime\");\r",
+									"let toTime = pm.environment.get(\"toTime\");\r",
+									"\r",
+									"if(x.bookingStatusResponse[0].bookingMessage == \"Appointment booked successfully\"){\r",
+									"    console.log(\"Appotinment booked for \", dateReq, \" from \", fromTime, \" to \", toTime, \".\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"mosip.pre-registration.booking.book\",\r\n    \"request\": {\r\n        \"bookingRequest\": [\r\n            {\r\n                \"preRegistrationId\": \"{{applicationId}}\",\r\n                \"registration_center_id\": \"{{regCenterId}}\",\r\n                \"appointment_date\": \"{{dateReq}}\",\r\n                \"time_slot_from\": \"{{fromTime}}\",\r\n                \"time_slot_to\": \"{{toTime}}\"\r\n            }\r\n        ]\r\n    },\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"{{time}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/appointment",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"appointment"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Part 3 of Application\n\n**2) Get list of registration centers associated with a given location  \n3) Get list of available time slots for a given date and registration center  \n4) Book a time slot for a given Application ID, registration center, date, time slot**"
+		},
+		{
+			"name": "Confirmation",
+			"item": [
+				{
+					"name": "{{applicationID}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/applications/{{applicationId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"applications",
+								"{{applicationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{applicationId}} (Appointment details)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/appointment/{{applicationId}}",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"appointment",
+								"{{applicationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eng (Registration Center Data)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/{{regCenterId}}/eng",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"registrationcenters",
+								"{{regCenterId}}",
+								"eng"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"mosip.pre-registration.qrcode.generate\",\r\n    \"request\": \"{{applicationId}}\",\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"{{time}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/qrCode/generate",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"qrCode",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Onscreen-Acknowledgement",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1//proxy/masterdata/templates/eng/Onscreen-Acknowledgement",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"",
+								"proxy",
+								"masterdata",
+								"templates",
+								"eng",
+								"Onscreen-Acknowledgement"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "notify",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "NotificationRequestDTO",
+									"value": "{\"id\":\"mosip.pre-registration.notification.notify\",\"request\":{\"name\":\"{{name}}\",\"preRegistrationId\":\"{{applicationId}}\",\"appointmentDate\":\"{{dateReq}}\",\"appointmentTime\":\"09:15 AM\",\"mobNum\":\"{{phoneNumber}}\",\"emailID\":\"{{email}}\",\"additionalRecipient\":false,\"isBatch\":false},\"version\":\"1.0\",\"requesttime\":\"{{time}}\"}",
+									"type": "text"
+								},
+								{
+									"key": "langCode",
+									"value": "eng",
+									"type": "text"
+								},
+								{
+									"key": "attachment",
+									"description": "Please change the file based on your application",
+									"type": "file",
+									"src": "/C:/Users/dveer/Downloads/21302359657364.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://uat2.mosip.net//preregistration/v1/notification/notify",
+							"protocol": "https",
+							"host": [
+								"uat2",
+								"mosip",
+								"net"
+							],
+							"path": [
+								"",
+								"preregistration",
+								"v1",
+								"notification",
+								"notify"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Part 4 of Application"
+		}
+	]
+}

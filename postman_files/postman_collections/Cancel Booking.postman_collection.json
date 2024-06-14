@@ -1,0 +1,105 @@
+{
+	"info": {
+		"_postman_id": "20fbba4d-e760-4841-adb6-7da7d779ccff",
+		"name": "Cancel Booking",
+		"description": "**5) Cancel a given booking id**",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34884075"
+	},
+	"item": [
+		{
+			"name": "for getting details of application (not in API seq)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"let x = jsonData.response;\r",
+							"\r",
+							"pm.environment.set(\"regCenterId\", x.registration_center_id);\r",
+							"pm.environment.set(\"dateReq\", x.appointment_date);\r",
+							"pm.environment.set(\"fromTimeCancel\", x.time_slot_from);\r",
+							"pm.environment.set(\"toTimeCancel\", x.time_slot_to);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://uat2.mosip.net//preregistration/v1/appointment/{{applicationId}}",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"",
+						"preregistration",
+						"v1",
+						"appointment",
+						"{{applicationId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{applicationId}}",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"if(jsonData.response && jsonData.response.message == \"Appointment for the selected application has been successfully cancelled\"){\r",
+							"    console.log(\"Appointment has been cancelled!\");\r",
+							"}\r",
+							"else if(jsonData.errors[0].errorCode == \"PRG_BOOK_RCI_013\"){\r",
+							"    console.log(\"Booking Data not found!\");\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"mosip.pre-registration.booking.book\",\r\n    \"request\": {\r\n        \"registration_center_id\": \"{{regCenterId}}\",\r\n        \"appointment_date\": \"{{dateReq}}\",\r\n        \"time_slot_from\": \"{{fromTime}}\",\r\n        \"time_slot_to\": \"{{toTime}}\",\r\n        \"pre_registration_id\": \"{{applicationId}}\"\r\n    },\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"{{time}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat2.mosip.net//preregistration/v1/appointment/{{applicationId}}",
+					"protocol": "https",
+					"host": [
+						"uat2",
+						"mosip",
+						"net"
+					],
+					"path": [
+						"",
+						"preregistration",
+						"v1",
+						"appointment",
+						"{{applicationId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
