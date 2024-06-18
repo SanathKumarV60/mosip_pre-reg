@@ -13,17 +13,9 @@ import net.mosip.register.demographic.Retrieve;
 public class App 
 {
     public static void main( String[] args ) throws IOException {
-        String resp;
-
         new Login();
-        resp = Login.loginProc();
-
-        if (resp.equals("")) {
-            System.err.println("Invalid OTP!");
-            System.out.println("------------------------------");
-            System.exit(0);
-        }
-
+        Login.loginProc();
+        
         menu();
     }
 

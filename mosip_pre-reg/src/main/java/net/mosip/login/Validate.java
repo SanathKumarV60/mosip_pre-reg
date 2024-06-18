@@ -6,24 +6,13 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.mosip.envManager;
 import okhttp3.*;
 
 public class Validate {
     public static void main(String[] args) throws IOException{
-        String response = validateOtp();
-        System.out.println(response);
-    }
-
-    public static String validateOtp() throws IOException{
-        new envManager();
-
-        OffsetDateTime now = OffsetDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
-        String formattedTime = formatter.format(gmtTime);
-        envManager.updateEnv("currentTime", formattedTime);
-
         String otp = null;
         Console console = System.console();
         if (console != null) {
@@ -32,6 +21,25 @@ public class Validate {
         } else{
             System.err.println("ERROR: Could not take in OTP!");
         }
+
+        String response = validateOtp(otp);
+        if (response.substring(0, 5).equals("ERROR")) {
+            System.err.println(response);
+        } else {
+            envManager.updateEnv("auth", response);
+            System.out.println("LOGGED IN SUCCESSFULLY!");
+        }
+        System.out.println("------------------------------");
+    }
+
+    public static String validateOtp(String otp) throws IOException{
+        new envManager();
+
+        OffsetDateTime now = OffsetDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
+        String formattedTime = formatter.format(gmtTime);
+        envManager.updateEnv("currentTime", formattedTime);
 
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
@@ -43,19 +51,21 @@ public class Validate {
             .addHeader("Content-Type", "application/json")
             .build();
         Response response = client.newCall(request).execute();
-        
-        if(response.header("Set-Cookie") != null){
-            String auth = ((response.header("Set-Cookie")).split(";")[0]).split("=")[1];
-            envManager.updateEnv("auth", auth);
-            System.out.println("LOGGED IN SUCCESSFULLY!");
-            System.out.println("------------------------------");
-        }
-        else{
-            System.err.println("ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!");
-            System.out.println("------------------------------");
-            return "";
-        }
+        String responseBody = response.body().string();
 
-        return response.body().string();
+        ObjectMapper objectMapper = new ObjectMapper();
+        ResponseData result = objectMapper.readValue(responseBody, ResponseData.class);
+
+        if (result.errors == null) {        
+            if(response.header("Set-Cookie") != null){
+                String auth = ((response.header("Set-Cookie")).split(";")[0]).split("=")[1];
+                return auth;
+            }
+            else{
+                return "ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!";
+            }
+        } else {
+            return "ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message;
+        }
     }
 }

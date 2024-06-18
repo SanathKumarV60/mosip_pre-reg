@@ -6,17 +6,33 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.mosip.envManager;
 
 import okhttp3.*;
 
 public class Captcha {
     public static void main(String[] args) throws IOException{
-        String response = sendOtpWithCaptcha();
-        System.out.println(response);
+        String userId = null;
+        Console console = System.console();
+        if (console != null) {
+            userId = console.readLine("Enter User ID: ");
+        } else{
+            System.err.println("ERROR: Could not take in User ID!");
+            System.out.println("------------------------------");
+        }
+        envManager.updateEnv("userId", userId);
+
+        String response = sendOtpWithCaptcha(userId);
+        if (response.substring(0, 5).equals("ERROR")) {
+            System.err.println(response);
+        } else {
+            envManager.updateEnv("auth", response);
+        }
     }
 
-    public static String sendOtpWithCaptcha() throws IOException{
+    public static String sendOtpWithCaptcha(String userId) throws IOException{
         new envManager();
 
         OffsetDateTime now = OffsetDateTime.now();
@@ -24,15 +40,6 @@ public class Captcha {
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
         String formattedTime = formatter.format(gmtTime);
         envManager.updateEnv("currentTime", formattedTime);
-
-        String userId = null;
-        Console console = System.console();
-        if (console != null) {
-            userId = console.readLine("Enter User ID: ");
-        } else{
-            System.err.println("ERROR: Could not take in User ID!");
-        }
-        envManager.updateEnv("userId", userId);
 
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
@@ -44,15 +51,39 @@ public class Captcha {
             .addHeader("Content-Type", "application/json")
             .build();
         Response response = client.newCall(request).execute();
+        String responseBody = response.body().string();
 
-        if(response.header("Set-Cookie") != null){
-            String auth = ((response.header("Set-Cookie")).split(";")[0]).split("=")[1];
-            envManager.updateEnv("auth", auth);
-        }
-        else{
-            System.err.println("ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!");
-        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        ResponseData result = objectMapper.readValue(responseBody, ResponseData.class);
 
-        return response.body().string();
+        if (result.errors == null) {
+            if(response.header("Set-Cookie") != null){
+                String auth = ((response.header("Set-Cookie")).split(";")[0]).split("=")[1];
+                return auth;
+            }
+            else{
+                return "ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!";
+            }
+        } else {
+                return "ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message;
+        }
     }
+}
+
+class ResponseData {
+    public String id;
+    public String version;
+    public String responsetime;
+    public ResponseDetails response;
+    public Errors[] errors;
+}
+
+class ResponseDetails {
+    public String message;
+    public String status;
+}
+
+class Errors {
+    public String errorCode;
+    public String message;
 }
