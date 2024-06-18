@@ -33,13 +33,11 @@ public class Captcha {
     }
 
     public static String sendOtpWithCaptcha(String userId) throws IOException{
-        new envManager();
 
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
         String formattedTime = formatter.format(gmtTime);
-        envManager.updateEnv("currentTime", formattedTime);
 
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
