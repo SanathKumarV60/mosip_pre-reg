@@ -48,11 +48,12 @@ public class Cancel {
 
     }
 
-    public static void cancel_application() throws IOException {
+    public static String cancel_application() throws IOException {
         int count = Display.display_booked();
         if (count == 0){
             System.out.println("MESSAGE: No Booked Records Found!");
             System.out.println("------------------------------");
+            return null;
         }
         
         Console console = System.console();
@@ -65,9 +66,11 @@ public class Cancel {
             System.out.println("Cancelled Appointment for application ID: " + applicationId + "!");
             System.out.println("Transaction ID " + resp.transactionId);
             System.out.println("------------------------------");
+            return null;
         } catch (Error ex) {
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
+            return "";
         }
     }
 }

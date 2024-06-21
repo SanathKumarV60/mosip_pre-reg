@@ -155,11 +155,9 @@ public class Display {
             ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
 
             int i = 0;
-            boolean found = false;
             int records = Integer.parseInt(resp.getTotalRecords());
             while (i < records) {
                 if (resp.getBasicDetails()[i].getPreRegistrationId().equals(applicationId)) {
-                    found = true;
                     envManager.updateEnv("applicationId", applicationId);
                     envManager.updateEnv("regCenterId", resp.getBasicDetails()[i].getBookingMetadata().getRegistration_center_id());
                     envManager.updateEnv("dateReq", resp.getBasicDetails()[i].getBookingMetadata().getAppointment_date());

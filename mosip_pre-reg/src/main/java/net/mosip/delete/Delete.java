@@ -10,26 +10,12 @@ import net.mosip.envManager;
 import net.mosip.applications.Display;
 
 public class Delete {
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException, Error {
         String response = delete_application();
         System.out.println(response);
     }
 
-    public static String delete_application() throws IOException{
-        new envManager();
-        
-        String resp = Display.display_applications();
-
-        if (resp == "") {
-            System.err.println("MESSAGE: No records found for given user id");
-            System.out.println("------------------------------");
-            return "";
-        }
-        
-        Console console = System.console();
-        String applicationId = console.readLine("Enter Application to delete from above: ");
-        System.out.println("------------------------------");
-
+    public static ResponseDetails delete_application_call(String applicationId) throws IOException, Error {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         MediaType mediaType = MediaType.parse("text/plain");
@@ -47,22 +33,39 @@ public class Delete {
         ResponseData result = objectMapper.readValue(responseBody, ResponseData.class);
 
         if (result.errors == null) {
-            System.out.println("Deleted application ID: " + result.response.preRegistrationId + "!");
-            System.out.println("Deleted By: " + result.response.deletedBy);
-            System.out.println("Deleted On: " + result.response.deletedDateTime);
-            System.out.println("------------------------------");
-        } else if (result.errors[0].errorCode.equals("PRG_PAM_APP_005")) {
-            System.err.println("ERROR (PRG_PAM_APP_005): No Such application ID exists!");
-            System.out.println("------------------------------");
+            return result.response;
         } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
-            System.out.println("------------------------------");
+            throw new Error(result);
         }
+    }
 
-        return responseBody;
+    public static String delete_application() throws IOException{
+        try {
+        String chk = Display.display_applications();
+
+        if (chk == "") {
+            System.err.println("MESSAGE: No records found for given user id");
+            System.out.println("------------------------------");
+            return "";
+        }
+        
+        Console console = System.console();
+        String applicationId = console.readLine("Enter Application to delete from above: ");
+        System.out.println("------------------------------");
+
+        ResponseDetails resp = delete_application_call(applicationId);
+
+        System.out.println("Deleted application ID: " + resp.preRegistrationId + "!");
+        System.out.println("Deleted By: " + resp.deletedBy);
+        System.out.println("Deleted On: " + resp.deletedDateTime);
+        System.out.println("------------------------------");
+        
+        return null;
+        } catch (Error ex) {
+            System.out.println(ex.getMessage());
+            System.out.println("------------------------------");
+            return "";
+        }
     }
 }
 
@@ -83,4 +86,10 @@ class ResponseDetails {
 class Errors {
     public String errorCode;
     public String message;
+}
+
+class Error extends Exception {
+    public Error (ResponseData result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }
