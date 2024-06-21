@@ -168,11 +168,6 @@ public class Display {
                 }
                 i++;
             }
-    
-            if (!found) {
-                System.err.println("ERROR: No Such Booked Application ID Exists!");
-                System.out.println("------------------------------");
-            }
         } catch (Error ex) {
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
