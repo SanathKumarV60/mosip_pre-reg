@@ -61,7 +61,7 @@ public class Pincode {
                 }
             }
         } catch (ErrorPin ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }

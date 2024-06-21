@@ -62,7 +62,7 @@ public class Province {
             }
 
         } catch (ErrorProvince ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }

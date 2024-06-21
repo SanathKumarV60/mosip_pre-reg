@@ -63,7 +63,7 @@ public class Consent {
                 }
             }
         } catch (ErrorConsent ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
 

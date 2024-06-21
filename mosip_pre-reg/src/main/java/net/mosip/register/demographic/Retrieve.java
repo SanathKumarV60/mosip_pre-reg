@@ -78,7 +78,7 @@ public class Retrieve {
             next(resp.preRegistrationId);
 
         } catch (ErrorRetrieve ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }

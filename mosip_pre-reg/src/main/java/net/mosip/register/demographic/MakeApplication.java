@@ -48,13 +48,13 @@ public class MakeApplication {
     public static void makeApplication() throws IOException {
         try {
             ResponseDetailsApp resp = makeApplication_call(envManager.getEnv("auth"), envManager.getEnv("name"), envManager.getEnv("dob"), envManager.getEnv("gender"), envManager.getEnv("residenceStat"), envManager.getEnv("addressLine"), envManager.getEnv("region"), envManager.getEnv("province"), envManager.getEnv("city"), envManager.getEnv("zone"), envManager.getEnv("pincode"), envManager.getEnv("phoneNumber"), envManager.getEnv("email"));
-            
+
             System.out.println("Booking Started with Application ID: " + resp.preRegistrationId + "!");
             envManager.updateEnv("applicationId", resp.preRegistrationId);
             System.out.println("Creation Time: " + resp.createdDateTime);
             System.out.println("------------------------------");
         } catch (ErrorApp ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
