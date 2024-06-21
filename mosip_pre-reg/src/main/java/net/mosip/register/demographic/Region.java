@@ -9,20 +9,17 @@ import okhttp3.*;
 import net.mosip.envManager;
 
 public class Region {
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException {
         getRegion();
     }
 
-    public static void getRegion() throws IOException{
-        new envManager();
-        Console console = System.console();
-
+    public static ResponseDetailsRegion getRegion_call(String auth) throws IOException, ErrorRegion {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
             .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/MOR/eng")
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -32,11 +29,22 @@ public class Region {
         ResponseDataRegion result = objectMapper.readValue(responseBody, ResponseDataRegion.class);
 
         if (result.errors == null) {
+            return result.response;
+        } else {
+            throw new ErrorRegion(result);
+        }
+    }
+
+    public static void getRegion() throws IOException {
+        try {
+            ResponseDetailsRegion resp = getRegion_call(envManager.getEnv("auth"));
+            Console console = System.console();
+
             int i = 1;
-            int l = result.response.locations.length;
+            int l = resp.locations.length;
             System.out.println("Available Regions: ");
-            while(i <= l && result.response.locations[i - 1].isActive){
-                System.out.println(String.valueOf(i) + ". " + result.response.locations[i - 1].name);
+            while(i <= l && resp.locations[i - 1].isActive){
+                System.out.println(String.valueOf(i) + ". " + resp.locations[i - 1].name);
                 i++;
             }
             while(true){
@@ -47,16 +55,13 @@ public class Region {
                     System.err.println("ERROR: Please enter a valid number!");
                     System.out.println("------------------------------");
                 } else {
-                    envManager.updateEnv("region", result.response.locations[cInt - 1].code);
+                    envManager.updateEnv("region", resp.locations[cInt - 1].code);
                     System.out.println("------------------------------");
                     break;
                 }
             }
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorRegion ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -92,4 +97,10 @@ class LocationsRegion {
     public String parentLocCode;
     public String langCode;
     public boolean isActive;
+}
+
+class ErrorRegion extends Exception {
+    public ErrorRegion (ResponseDataRegion result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

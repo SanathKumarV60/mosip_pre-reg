@@ -14,15 +14,13 @@ public class Consent {
         System.out.println(response);
     }
 
-    public static boolean giveConsent() throws IOException{
-        new envManager();
-
+    public static ResponseDetailsConsent giveConsent_call(String auth) throws IOException, ErrorConsent {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
             .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/templates/eng/consent")
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -31,9 +29,19 @@ public class Consent {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataConsent result = objectMapper.readValue(responseBody, ResponseDataConsent.class);
 
-        boolean consented = false;
         if (result.errors == null) {
-            System.out.println(result.response.templates[0].fileText);
+            return result.response;
+        } else {
+            throw new ErrorConsent(result);
+        }
+    }
+
+    public static boolean giveConsent() throws IOException{
+        boolean consented = false;
+
+        try {
+            ResponseDetailsConsent resp = giveConsent_call(envManager.getEnv("auth"));
+            System.out.println(resp.templates[0].fileText);
             Console console = System.console();
         
             String accept = console.readLine("Do you give Consent? (Y/N): ");
@@ -54,6 +62,9 @@ public class Consent {
                     accept = getValidInput();
                 }
             }
+        } catch (ErrorConsent ex) {
+            System.out.println(ex.getMessage());
+            System.out.println("------------------------------");
         }
 
         return consented;
@@ -108,4 +119,10 @@ class TemplatesConsent {
 class ErrorsConsent {
     public String errorCode;
     public String message;
+}
+
+class ErrorConsent extends Exception {
+    public ErrorConsent (ResponseDataConsent result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

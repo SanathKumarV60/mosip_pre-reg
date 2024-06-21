@@ -68,7 +68,7 @@ public class Cancel {
             System.out.println("------------------------------");
             return null;
         } catch (Error ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
             return "";
         }

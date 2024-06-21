@@ -39,7 +39,7 @@ public class Delete {
         }
     }
 
-    public static String delete_application() throws IOException{
+    public static String delete_application() throws IOException {
         try {
         String chk = Display.display_applications();
 
@@ -59,10 +59,10 @@ public class Delete {
         System.out.println("Deleted By: " + resp.deletedBy);
         System.out.println("Deleted On: " + resp.deletedDateTime);
         System.out.println("------------------------------");
-        
+
         return null;
         } catch (Error ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
             return "";
         }

@@ -7,8 +7,8 @@ import net.mosip.login.Login;
 import net.mosip.applications.Display;
 import net.mosip.delete.Delete;
 import net.mosip.cancel.Cancel;
-import net.mosip.register.demographic.runDemographicDetails;
 import net.mosip.register.demographic.Retrieve;
+import net.mosip.register.demographic.runDemographicDetails;
 
 public class App 
 {
@@ -19,7 +19,7 @@ public class App
         menu();
     }
 
-    public static void menu() throws IOException{
+    public static void menu() throws IOException {
         while(true) {
             Console console = System.console();
             int choice = -1;

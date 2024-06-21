@@ -13,19 +13,21 @@ public class Page1 {
         fillPage();
     }
 
-    public static void fillPage() throws IOException{
-        new envManager();
-
+    public static void fillPage_call(String auth) throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
             .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/dynamicfields?pageNumber=1&pageSize=10")
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         @SuppressWarnings("unused")
         String responseBody = response.body().string();
+    }
+
+    public static void fillPage() throws IOException{
+        fillPage_call(envManager.getEnv("auth"));
 
         Console console = System.console();
 

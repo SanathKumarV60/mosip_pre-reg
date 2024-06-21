@@ -9,20 +9,17 @@ import okhttp3.*;
 import net.mosip.envManager;
 
 public class City {
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException {
         getCity();
     }
 
-    public static void getCity() throws IOException{
-        new envManager();
-        Console console = System.console();
-
+    public static ResponseDetailsCity getCity_call(String auth, String province) throws IOException, ErrorCity {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
-            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/" + envManager.getEnv("province") + "/eng")
+            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/" + province + "/eng")
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -32,11 +29,24 @@ public class City {
         ResponseDataCity result = objectMapper.readValue(responseBody, ResponseDataCity.class);
 
         if (result.errors == null) {
+            return result.response;
+        } else {
+            throw new ErrorCity(result);
+        }
+    }
+
+    public static void getCity() throws IOException {
+
+        try {
+            ResponseDetailsCity resp = getCity_call(envManager.getEnv("auth"), envManager.getEnv("province"));
+
+            Console console = System.console();
+
             int i = 1;
-            int l = result.response.locations.length;
+            int l = resp.locations.length;
             System.out.println("Available Cities in your selected province: ");
-            while(i <= l && result.response.locations[i - 1].isActive){
-                System.out.println(String.valueOf(i) + ". " + result.response.locations[i - 1].name);
+            while(i <= l && resp.locations[i - 1].isActive){
+                System.out.println(String.valueOf(i) + ". " + resp.locations[i - 1].name);
                 i++;
             }
             while(true){
@@ -47,16 +57,13 @@ public class City {
                     System.err.println("ERROR: Please enter a valid number!");
                     System.out.println("------------------------------");
                 } else {
-                    envManager.updateEnv("city", result.response.locations[cInt - 1].code);
+                    envManager.updateEnv("city", resp.locations[cInt - 1].code);
                     System.out.println("------------------------------");
                     break;
                 }
             }
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorCity ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -92,4 +99,10 @@ class LocationsCity {
     public String parentLocCode;
     public String langCode;
     public boolean isActive;
+}
+
+class ErrorCity extends Exception {
+    public ErrorCity (ResponseDataCity result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

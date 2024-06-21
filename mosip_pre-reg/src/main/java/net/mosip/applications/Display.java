@@ -167,7 +167,7 @@ public class Display {
                 i++;
             }
         } catch (Error ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }    

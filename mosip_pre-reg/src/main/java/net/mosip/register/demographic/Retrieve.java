@@ -18,13 +18,13 @@ public class Retrieve {
         retrieve();
     }
 
-    public static void retrieve() throws IOException {
+    public static ResponseDetailsRetrieve retrieve_call(String auth, String applicationId) throws IOException, ErrorRetrieve {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
-            .url("https://uat2.mosip.net//preregistration/v1/applications/" + envManager.getEnv("applicationId"))
+            .url("https://uat2.mosip.net//preregistration/v1/applications/" + applicationId)
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -33,48 +33,52 @@ public class Retrieve {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataRetrieve result = objectMapper.readValue(responseBody, ResponseDataRetrieve.class);
 
-        //System.out.println(responseBody);
+        if(result.errors == null) {
+            return result.response;
+        } else {
+            throw new ErrorRetrieve(result);
+        }
+    }
 
-        if (result.errors == null){
+    public static void retrieve() throws IOException {
+        try {
+            ResponseDetailsRetrieve resp = retrieve_call(envManager.getEnv("auth"), envManager.getEnv("applicationId"));
             System.out.println("Please Check your details: ");
             System.out.println("------------------------------");
-            System.out.println("Application ID: " + result.response.preRegistrationId);
-            envManager.updateEnv("applicationId", result.response.preRegistrationId);
-            System.out.println("Created By: " + result.response.createdBy);
-            System.out.println("Created On: " + result.response.createdDateTime);
-            System.out.println("Name: " + result.response.demographicDetails.identity.fullName[0].value);
-            envManager.updateEnv("name", result.response.demographicDetails.identity.fullName[0].value);
-            System.out.println("DOB: " + result.response.demographicDetails.identity.dateOfBirth);
-            envManager.updateEnv("dob", result.response.demographicDetails.identity.dateOfBirth);
-            System.out.println("Gender: " + result.response.demographicDetails.identity.gender[0].value);
-            envManager.updateEnv("gender", result.response.demographicDetails.identity.gender[0].value);
-            System.out.println("Address: " + result.response.demographicDetails.identity.addressLine1[0].value);
-            envManager.updateEnv("addressLine", result.response.demographicDetails.identity.addressLine1[0].value);
-            System.out.println("Region: " + result.response.demographicDetails.identity.region[0].value);
-            envManager.updateEnv("region", result.response.demographicDetails.identity.region[0].value);
-            System.out.println("Province: " + result.response.demographicDetails.identity.province[0].value);
-            envManager.updateEnv("province", result.response.demographicDetails.identity.province[0].value);
-            System.out.println("City: " + result.response.demographicDetails.identity.city[0].value);
-            envManager.updateEnv("city", result.response.demographicDetails.identity.city[0].value);
-            System.out.println("Zone: " + result.response.demographicDetails.identity.zone[0].value);
-            envManager.updateEnv("zone", result.response.demographicDetails.identity.zone[0].value);
-            System.out.println("Postal Code: " + result.response.demographicDetails.identity.postalCode);
-            envManager.updateEnv("pincode", result.response.demographicDetails.identity.postalCode);
-            System.out.println("Phone Number: " + result.response.demographicDetails.identity.phone);
-            envManager.updateEnv("phoneNumber", result.response.demographicDetails.identity.phone);
-            System.out.println("E-mail: " + result.response.demographicDetails.identity.email);
-            envManager.updateEnv("email", result.response.demographicDetails.identity.email);
-            System.out.println("Status: " + result.response.statusCode);;
-            envManager.updateEnv("status", result.response.statusCode);
+            System.out.println("Application ID: " + resp.preRegistrationId);
+            envManager.updateEnv("applicationId", resp.preRegistrationId);
+            System.out.println("Created By: " + resp.createdBy);
+            System.out.println("Created On: " + resp.createdDateTime);
+            System.out.println("Name: " + resp.demographicDetails.identity.fullName[0].value);
+            envManager.updateEnv("name", resp.demographicDetails.identity.fullName[0].value);
+            System.out.println("DOB: " + resp.demographicDetails.identity.dateOfBirth);
+            envManager.updateEnv("dob", resp.demographicDetails.identity.dateOfBirth);
+            System.out.println("Gender: " + resp.demographicDetails.identity.gender[0].value);
+            envManager.updateEnv("gender", resp.demographicDetails.identity.gender[0].value);
+            System.out.println("Address: " + resp.demographicDetails.identity.addressLine1[0].value);
+            envManager.updateEnv("addressLine", resp.demographicDetails.identity.addressLine1[0].value);
+            System.out.println("Region: " + resp.demographicDetails.identity.region[0].value);
+            envManager.updateEnv("region", resp.demographicDetails.identity.region[0].value);
+            System.out.println("Province: " + resp.demographicDetails.identity.province[0].value);
+            envManager.updateEnv("province", resp.demographicDetails.identity.province[0].value);
+            System.out.println("City: " + resp.demographicDetails.identity.city[0].value);
+            envManager.updateEnv("city", resp.demographicDetails.identity.city[0].value);
+            System.out.println("Zone: " + resp.demographicDetails.identity.zone[0].value);
+            envManager.updateEnv("zone", resp.demographicDetails.identity.zone[0].value);
+            System.out.println("Postal Code: " + resp.demographicDetails.identity.postalCode);
+            envManager.updateEnv("pincode", resp.demographicDetails.identity.postalCode);
+            System.out.println("Phone Number: " + resp.demographicDetails.identity.phone);
+            envManager.updateEnv("phoneNumber", resp.demographicDetails.identity.phone);
+            System.out.println("E-mail: " + resp.demographicDetails.identity.email);
+            envManager.updateEnv("email", resp.demographicDetails.identity.email);
+            System.out.println("Status: " + resp.statusCode);;
+            envManager.updateEnv("status", resp.statusCode);
             System.out.println("------------------------------");
 
-            next(result.response.preRegistrationId);
+            next(resp.preRegistrationId);
 
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorRetrieve ex) {
+            System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -200,4 +204,10 @@ class RegionRetrieve {
 class ErrorsRetrieve {
     public String errorCode;
     public String message;
+}
+
+class ErrorRetrieve extends Exception {
+    public ErrorRetrieve (ResponseDataRetrieve result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

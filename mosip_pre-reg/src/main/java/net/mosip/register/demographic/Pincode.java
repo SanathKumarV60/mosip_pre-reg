@@ -13,14 +13,11 @@ public class Pincode {
         getPin();
     }
 
-    public static void getPin() throws IOException{
-        new envManager();
-        Console console = System.console();
-
+    public static ResponseDetailsPin getPin_call(String auth, String zone) throws IOException, ErrorPin {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
-            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/" + envManager.getEnv("zone") + "/eng")
+            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/locations/immediatechildren/" + zone + "/eng")
             .method("GET", null)
             .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
             .build();
@@ -32,11 +29,22 @@ public class Pincode {
         ResponseDataPin result = objectMapper.readValue(responseBody, ResponseDataPin.class);
 
         if (result.errors == null) {
+            return result.response;
+        } else {
+            throw new ErrorPin(result);
+        }
+    }
+
+    public static void getPin() throws IOException{
+        try {
+            ResponseDetailsPin resp = getPin_call(envManager.getEnv("auth"), envManager.getEnv("zone"));
+            Console console = System.console();
+            
             int i = 1;
-            int l = result.response.locations.length;
+            int l = resp.locations.length;
             System.out.println("Available pins in your selected zone: ");
-            while(i <= l && result.response.locations[i - 1].isActive){
-                System.out.println(String.valueOf(i) + ". " + result.response.locations[i - 1].name);
+            while(i <= l && resp.locations[i - 1].isActive){
+                System.out.println(String.valueOf(i) + ". " + resp.locations[i - 1].name);
                 i++;
             }
             while(true){
@@ -47,16 +55,13 @@ public class Pincode {
                     System.err.println("ERROR: Please enter a valid number!");
                     System.out.println("------------------------------");
                 } else {
-                    envManager.updateEnv("pincode", result.response.locations[cInt - 1].code);
+                    envManager.updateEnv("pincode", resp.locations[cInt - 1].code);
                     System.out.println("------------------------------");
                     break;
                 }
             }
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorPin ex) {
+            System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -92,4 +97,10 @@ class LocationsPin {
     public String parentLocCode;
     public String langCode;
     public boolean isActive;
+}
+
+class ErrorPin extends Exception {
+    public ErrorPin (ResponseDataPin result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

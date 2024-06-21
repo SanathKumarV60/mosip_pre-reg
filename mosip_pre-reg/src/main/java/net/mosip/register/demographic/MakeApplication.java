@@ -15,19 +15,16 @@ public class MakeApplication {
         makeApplication();
     }
 
-    public static void makeApplication() throws IOException {
-        new envManager();
-
+    public static ResponseDetailsApp makeApplication_call(String auth, String name, String dob, String gender, String residenceStat, String addressLine, String region, String province, String city, String zone, String pincode, String phone, String email) throws IOException, ErrorApp {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
         String formattedTime = formatter.format(gmtTime);
-        envManager.updateEnv("currentTime", formattedTime);
 
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create("{\r\n    \"id\": \"mosip.pre-registration.demographic.create\",\r\n    \"request\": {\r\n        \"langCode\": \"eng\",\r\n        \"demographicDetails\": {\r\n            \"identity\": {\r\n                \"IDSchemaVersion\": 0.1,\r\n                \"fullName\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + envManager.getEnv("name") + "\"\r\n                    }\r\n                ],\r\n                \"dateOfBirth\": \"" + envManager.getEnv("dob") + "\",\r\n                \"gender\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + envManager.getEnv("gender") + "\"\r\n                    }\r\n                ],\r\n                \"residenceStatus\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + envManager.getEnv("residenceStat") + "\"\r\n                    }\r\n                ],\r\n                \"addressLine1\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + envManager.getEnv("addressLine") + "\"\r\n                    }\r\n                ],\r\n                \"region\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + envManager.getEnv("region") + "\"\r\n                    }\r\n                ],\r\n                \"province\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + envManager.getEnv("province") + "\"\r\n                    }\r\n                ],\r\n                \"city\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + envManager.getEnv("city") + "\"\r\n                    }\r\n                ],\r\n                \"zone\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + envManager.getEnv("zone") + "\"\r\n                    }\r\n                ],\r\n                \"postalCode\": \"" + envManager.getEnv("pincode") + "\",\r\n                \"phone\": \"" + envManager.getEnv("phoneNumber") + "\",\r\n                \"email\": \"" + envManager.getEnv("email") + "\"\r\n            }\r\n        }\r\n    },\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"" + formattedTime +"\"\r\n}", mediaType);
+        RequestBody body = RequestBody.create("{\r\n    \"id\": \"mosip.pre-registration.demographic.create\",\r\n    \"request\": {\r\n        \"langCode\": \"eng\",\r\n        \"demographicDetails\": {\r\n            \"identity\": {\r\n                \"IDSchemaVersion\": 0.1,\r\n                \"fullName\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + name + "\"\r\n                    }\r\n                ],\r\n                \"dateOfBirth\": \"" + dob + "\",\r\n                \"gender\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + gender + "\"\r\n                    }\r\n                ],\r\n                \"residenceStatus\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + residenceStat + "\"\r\n                    }\r\n                ],\r\n                \"addressLine1\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + addressLine + "\"\r\n                    }\r\n                ],\r\n                \"region\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + region + "\"\r\n                    }\r\n                ],\r\n                \"province\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + province + "\"\r\n                    }\r\n                ],\r\n                \"city\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + city + "\"\r\n                    }\r\n                ],\r\n                \"zone\": [\r\n                    {\r\n                        \"language\": \"eng\",\r\n                        \"value\": \"" + zone + "\"\r\n                    }\r\n                ],\r\n                \"postalCode\": \"" + pincode + "\",\r\n                \"phone\": \"" + phone + "\",\r\n                \"email\": \"" + email + "\"\r\n            }\r\n        }\r\n    },\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"" + formattedTime +"\"\r\n}", mediaType);
         Request request = new Request.Builder()
             .url("https://uat2.mosip.net//preregistration/v1/applications")
             .method("POST", body)
@@ -41,16 +38,23 @@ public class MakeApplication {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataApp result = objectMapper.readValue(responseBody, ResponseDataApp.class);
 
-        if(result.errors == null){
-            System.out.println("Booking Started with Application ID: " + result.response.preRegistrationId + "!");
-            envManager.updateEnv("applicationId", result.response.preRegistrationId);
-            System.out.println("Creation Time: " + result.response.createdDateTime);
-            System.out.println("------------------------------");
+        if (result.errors == null) {
+            return result.response;
         } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR" + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+            throw new ErrorApp(result);
+        }
+    }
+
+    public static void makeApplication() throws IOException {
+        try {
+            ResponseDetailsApp resp = makeApplication_call(envManager.getEnv("auth"), envManager.getEnv("name"), envManager.getEnv("dob"), envManager.getEnv("gender"), envManager.getEnv("residenceStat"), envManager.getEnv("addressLine"), envManager.getEnv("region"), envManager.getEnv("province"), envManager.getEnv("city"), envManager.getEnv("zone"), envManager.getEnv("pincode"), envManager.getEnv("phoneNumber"), envManager.getEnv("email"));
+            
+            System.out.println("Booking Started with Application ID: " + resp.preRegistrationId + "!");
+            envManager.updateEnv("applicationId", resp.preRegistrationId);
+            System.out.println("Creation Time: " + resp.createdDateTime);
+            System.out.println("------------------------------");
+        } catch (ErrorApp ex) {
+            System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -135,4 +139,10 @@ class ZoneVal {
 class ErrorsApp {
     public String errorCode;
     public String message;
+}
+
+class ErrorApp extends Exception {
+    public ErrorApp (ResponseDataApp result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

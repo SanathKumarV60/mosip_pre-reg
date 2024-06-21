@@ -7,7 +7,7 @@ public class runDemographicDetails {
         fill();
     }
 
-    public static void fill() throws IOException{
+    public static void fill() throws IOException {
         boolean consented = Consent.giveConsent();
 
         if(consented){
