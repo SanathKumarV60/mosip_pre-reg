@@ -13,16 +13,13 @@ public class OnScreenAck {
         getAck();
     }
 
-    public static void getAck() throws IOException {
-        new envManager();
-        Console console = System.console();
-
+    public static ResponseDetailsAck getAck_call(String auth) throws IOException, ErrorAck {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
             .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/templates/eng/Onscreen-Acknowledgement")
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -32,7 +29,19 @@ public class OnScreenAck {
         ResponseDataAck result = objectMapper.readValue(responseBody, ResponseDataAck.class);
 
         if (result.errors == null) {
-            System.out.println(result.response.templates[0].fileText);
+            return result.response;
+        } else {
+            throw new ErrorAck(result);
+        }
+    }
+
+    public static void getAck() throws IOException {
+        try {
+            ResponseDetailsAck resp = getAck_call(envManager.getEnv("auth"));
+
+            Console console = System.console();
+
+            System.out.println(resp.templates[0].fileText);
             System.out.println("------------------------------");
 
             while (true) {
@@ -48,11 +57,8 @@ public class OnScreenAck {
                     System.out.println("------------------------------");
                 }
             }
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorAck ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -88,4 +94,10 @@ class Templates {
 class ErrorsAck {
     public String errorCode;
     public String message;
+}
+
+class ErrorAck extends Exception {
+    public ErrorAck (ResponseDataAck result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

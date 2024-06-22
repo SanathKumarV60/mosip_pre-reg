@@ -15,14 +15,11 @@ public class GenerateQR {
         generate(envManager.getEnv("applicationId"));
     }
 
-    public static void generate(String applicationId) throws IOException {
-        new envManager();
-
+    public static ResponseDetailsQR generate_call(String auth, String applicationId) throws IOException, ErrorQR {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
         String formattedTime = formatter.format(gmtTime);
-        envManager.updateEnv("currentTime", formattedTime);
         
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
@@ -32,7 +29,7 @@ public class GenerateQR {
         .url("https://uat2.mosip.net//preregistration/v1/qrCode/generate")
         .method("POST", body)
         .addHeader("Content-Type", "application/json")
-        .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+        .addHeader("Cookie", "Authorization=" + auth)
         .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -42,12 +39,19 @@ public class GenerateQR {
         ResponseDataQR result = objectMapper.readValue(responseBody, ResponseDataQR.class);
 
         if (result.errors == null) {
-            System.out.println("QR Code String: " + result.response.qrcode);
+            return result.response;
         } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+            throw new ErrorQR(result);
+        }
+    }
+
+    public static void generate(String applicationId) throws IOException {
+        try {
+            ResponseDetailsQR resp = generate_call(envManager.getEnv("auth"), applicationId);
+
+            System.out.println("QR Code String: " + resp.qrcode);
+        } catch (ErrorQR ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -69,4 +73,10 @@ class ResponseDetailsQR {
 class ErrorsQR {
     public String errorCode;
     public String message;
+}
+
+class ErrorQR extends Exception {
+    public ErrorQR (ResponseDataQR result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

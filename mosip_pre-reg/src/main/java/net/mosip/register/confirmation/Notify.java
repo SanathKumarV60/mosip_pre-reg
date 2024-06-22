@@ -17,15 +17,42 @@ public class Notify {
         getNotif(envManager.getEnv("applicationId"));
     }
 
-    public static void getNotif(String applicationId) throws IOException {
-        new envManager();
-        Console console = System.console();
-
+    public static ResponseDetailsNotif getNotif_call(String auth, String name, String applicationId, String date, String appointmentTime, String phone, String email, String filePath) throws IOException, ErrorNotif {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
         String formattedTime = formatter.format(gmtTime);
-        envManager.updateEnv("currentTime", formattedTime);
+
+        OkHttpClient client = new OkHttpClient().newBuilder()
+            .build();
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+            .addFormDataPart("NotificationRequestDTO","{\"id\":\"mosip.pre-registration.notification.notify\",\"request\":{\"name\":\"" + name + "\",\"preRegistrationId\":\"" + applicationId + "\",\"appointmentDate\":\"" + date + "\",\"appointmentTime\":\"" + appointmentTime + "\",\"mobNum\":\"" + phone + "\",\"emailID\":\"" + email + "\",\"additionalRecipient\":false,\"isBatch\":false},\"version\":\"1.0\",\"requesttime\":\"" + formattedTime + "\"}")
+            .addFormDataPart("langCode","eng")
+            .addFormDataPart("attachment", "ack.pdf",
+                RequestBody.create(new File(filePath), 
+                MediaType.parse("application/octet-stream")))
+        .build();
+        Request request = new Request.Builder()
+        .url("https://uat2.mosip.net//preregistration/v1/notification/notify")
+        .method("POST", body)
+        .addHeader("Cookie", "Authorization=" + auth)
+        .build();
+        Response response = client.newCall(request).execute();
+        String responseBody = response.body().string();
+
+        //Create JSON parse for body
+        ObjectMapper objectMapper = new ObjectMapper();
+        ResponseDataNotif result = objectMapper.readValue(responseBody, ResponseDataNotif.class);        
+
+        if (result.errors == null) {
+            return result.response;
+        } else {
+            throw new ErrorNotif(result);
+        }
+    }
+
+    public static void getNotif(String applicationId) throws IOException {
+        Console console = System.console();
 
         String appointmentTime = envManager.getEnv("fromTime");
         int part = Integer.parseInt(appointmentTime.substring(0, 2));
@@ -44,35 +71,17 @@ public class Notify {
         String email = console.readLine("E-mail: ");
         System.out.println("------------------------------");
 
-        OkHttpClient client = new OkHttpClient().newBuilder()
-            .build();
-        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-            .addFormDataPart("NotificationRequestDTO","{\"id\":\"mosip.pre-registration.notification.notify\",\"request\":{\"name\":\"" + envManager.getEnv("name") + "\",\"preRegistrationId\":\"" + applicationId + "\",\"appointmentDate\":\"" + envManager.getEnv("dateReq") + "\",\"appointmentTime\":\"" + appointmentTime + "\",\"mobNum\":\"" + phone + "\",\"emailID\":\"" + email + "\",\"additionalRecipient\":false,\"isBatch\":false},\"version\":\"1.0\",\"requesttime\":\"" + formattedTime + "\"}")
-            .addFormDataPart("langCode","eng")
-            .addFormDataPart("attachment", "ack.pdf",
-                RequestBody.create(new File("/C:/Users/dveer/Downloads/21302359657364.pdf"), 
-                MediaType.parse("application/octet-stream")))
-        .build();
-        Request request = new Request.Builder()
-        .url("https://uat2.mosip.net//preregistration/v1/notification/notify")
-        .method("POST", body)
-        .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
-        .build();
-        Response response = client.newCall(request).execute();
-        String responseBody = response.body().string();
+        //  THIS NEEDS TO BE REPLACED WITH THE DOCUMENT THAT IS CREATED
+        //  BY THE SYSTEM WITH THE QR CODE AND CONFIRMATION
+        String filePath = "21302359657364.pdf";
 
-        //Create JSON parse for body
-        ObjectMapper objectMapper = new ObjectMapper();
-        ResponseDataNotif result = objectMapper.readValue(responseBody, ResponseDataNotif.class);
+        try {
+            ResponseDetailsNotif resp = getNotif_call(envManager.getEnv("auth"), envManager.getEnv("name"), applicationId, envManager.getEnv("dateReq"), appointmentTime, phone, email, filePath);
 
-        if (result.errors == null) {
-            System.out.println(result.response.message);
+            System.out.println(resp.message);
             System.out.println("------------------------------");
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorNotif ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -93,4 +102,10 @@ class ResponseDetailsNotif {
 class ErrorsNotif {
     public String errorCode;
     public String message;
+}
+
+class ErrorNotif extends Exception {
+    public ErrorNotif (ResponseDataNotif result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }
