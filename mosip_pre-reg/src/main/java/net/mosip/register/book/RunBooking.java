@@ -11,7 +11,7 @@ public class RunBooking {
     }
 
     public static void runBooking(String applicationId) throws IOException {
-        MasterData.getMasterData();
+        MasterData.main(null);
         Centers.getCenters();
         TimeSlots.getSlots();
         Appointment.getAppointment(applicationId);

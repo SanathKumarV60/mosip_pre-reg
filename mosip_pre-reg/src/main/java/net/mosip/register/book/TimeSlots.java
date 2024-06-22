@@ -14,16 +14,13 @@ public class TimeSlots {
         getSlots();
     }
 
-    public static void getSlots() throws IOException {
-        new envManager();
-        Console console = System.console();
-
+    public static ResponseDetailsSlots getSlots_call(String auth, String regCenterId) throws IOException, ErrorSlots {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
-            .url("https://uat2.mosip.net//preregistration/v1/appointment/availability/" + envManager.getEnv("regCenterId"))
+            .url("https://uat2.mosip.net//preregistration/v1/appointment/availability/" + regCenterId)
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -33,13 +30,25 @@ public class TimeSlots {
         ResponseDataSlots result = objectMapper.readValue(responseBody, ResponseDataSlots.class);
 
         if (result.errors == null) {
+            return result.response;
+        } else {
+            throw new ErrorSlots(result);
+        }
+    }
+
+    public static void getSlots() throws IOException {
+        try {
+            ResponseDetailsSlots resp = getSlots_call(envManager.getEnv("auth"), envManager.getEnv("regCenterId"));
+
+            Console console = System.console();
+
             ArrayList<String> datesList = new ArrayList<>();
             int n = 1;
             System.out.println("Available Dates:");
-            for (int i = 0; i < result.response.centerDetails.length; i++){
-                if (!result.response.centerDetails[i].holiday) {
-                    System.out.println(String.valueOf(n++) + ". " + result.response.centerDetails[i].date);
-                    datesList.add(result.response.centerDetails[i].date);
+            for (int i = 0; i < resp.centerDetails.length; i++){
+                if (!resp.centerDetails[i].holiday) {
+                    System.out.println(String.valueOf(n++) + ". " + resp.centerDetails[i].date);
+                    datesList.add(resp.centerDetails[i].date);
                 } else {
                     continue;
                 }
@@ -62,15 +71,15 @@ public class TimeSlots {
             ArrayList<String[]> slotsList = new ArrayList<>();
             String date = envManager.getEnv("dateReq");
             int m = 1;
-            for (int i = 0; i < result.response.centerDetails.length; i++){
-                if (result.response.centerDetails[i].date.equals(date)) {
-                    for (int j = 0; j < result.response.centerDetails[i].timeSlots.length; j++) {
-                        if (result.response.centerDetails[i].timeSlots[j].availability == 0) {
+            for (int i = 0; i < resp.centerDetails.length; i++){
+                if (resp.centerDetails[i].date.equals(date)) {
+                    for (int j = 0; j < resp.centerDetails[i].timeSlots.length; j++) {
+                        if (resp.centerDetails[i].timeSlots[j].availability == 0) {
                             continue;
                         } else {
-                            System.out.println(String.valueOf(m++) + ". " + result.response.centerDetails[i].timeSlots[j].fromTime + " - " + result.response.centerDetails[i].timeSlots[j].toTime);
+                            System.out.println(String.valueOf(m++) + ". " + resp.centerDetails[i].timeSlots[j].fromTime + " - " + resp.centerDetails[i].timeSlots[j].toTime);
 
-                            String[] val = {result.response.centerDetails[i].timeSlots[j].fromTime, result.response.centerDetails[i].timeSlots[j].toTime};
+                            String[] val = {resp.centerDetails[i].timeSlots[j].fromTime, resp.centerDetails[i].timeSlots[j].toTime};
                             slotsList.add(val);
                         }
                     }
@@ -94,11 +103,8 @@ public class TimeSlots {
                 }
             }
 
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorSlots ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -133,4 +139,10 @@ class Slots {
 class ErrorsSlots {
     public String errorCode;
     public String message;
+}
+
+class ErrorSlots extends Exception {
+    public ErrorSlots (ResponseDataSlots result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

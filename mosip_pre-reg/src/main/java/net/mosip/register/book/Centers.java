@@ -14,16 +14,13 @@ public class Centers {
         getCenters();
     }
 
-    public static void getCenters() throws IOException {
-        new envManager();
-        Console console = System.console();
-
+    public static ResponseDetailsCenters getCenters_call(String auth, String pincode) throws IOException, ErrorCenters {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
-            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/eng/5/names?name=" + envManager.getEnv("pincode"))
+            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/eng/5/names?name=" + pincode)
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -32,27 +29,39 @@ public class Centers {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataCenters result = objectMapper.readValue(responseBody, ResponseDataCenters.class);
 
-        if (result.errors == null){
+        if (result.errors == null) {
+            return result.response;
+        } else {
+            throw new ErrorCenters(result);
+        }
+    }
+
+    public static void getCenters() throws IOException {
+        try {
+            ResponseDetailsCenters resp = getCenters_call(envManager.getEnv("auth"), envManager.getEnv("pincode"));
+
+            Console console = System.console();
+
             int i = 1;
             ArrayList<String> codesList = new ArrayList<>();
-            for (int j = 0; j < result.response.registrationCenters.length; j++){
-                if (result.response.registrationCenters[j].isActive) {
-                    System.out.println(String.valueOf(i++) + ". " + result.response.registrationCenters[j].name + " (" + result.response.registrationCenters[j].id + "),");
-                    System.out.println(result.response.registrationCenters[j].addressLine1 + ",\n" + result.response.registrationCenters[j].addressLine2 + ",\n" + result.response.registrationCenters[j].addressLine3);
+            for (int j = 0; j < resp.registrationCenters.length; j++){
+                if (resp.registrationCenters[j].isActive) {
+                    System.out.println(String.valueOf(i++) + ". " + resp.registrationCenters[j].name + " (" + resp.registrationCenters[j].id + "),");
+                    System.out.println(resp.registrationCenters[j].addressLine1 + ",\n" + resp.registrationCenters[j].addressLine2 + ",\n" + resp.registrationCenters[j].addressLine3);
                     System.out.println("___________");
-                    System.out.println("Contact Person: " + result.response.registrationCenters[j].contactPerson);
-                    System.out.println("Phone Number: " + result.response.registrationCenters[j].contactPhone);
-                    System.out.println("Time Zone: " + result.response.registrationCenters[j].timeZone);
-                    System.out.println("Working hours: " + result.response.registrationCenters[j].centerStartTime + " - " + result.response.registrationCenters[j].centerEndTime);
-                    System.out.println("Lunch Time: " + result.response.registrationCenters[j].lunchStartTime + " - " + result.response.registrationCenters[j].lunchEndTime);
-                    System.out.println("Number of kiosks: " + result.response.registrationCenters[j].numberOfKiosks);
-                    System.out.println("Per Kiosk Process Time: " + result.response.registrationCenters[j].perKioskProcessTime);
+                    System.out.println("Contact Person: " + resp.registrationCenters[j].contactPerson);
+                    System.out.println("Phone Number: " + resp.registrationCenters[j].contactPhone);
+                    System.out.println("Time Zone: " + resp.registrationCenters[j].timeZone);
+                    System.out.println("Working hours: " + resp.registrationCenters[j].centerStartTime + " - " + resp.registrationCenters[j].centerEndTime);
+                    System.out.println("Lunch Time: " + resp.registrationCenters[j].lunchStartTime + " - " + resp.registrationCenters[j].lunchEndTime);
+                    System.out.println("Number of kiosks: " + resp.registrationCenters[j].numberOfKiosks);
+                    System.out.println("Per Kiosk Process Time: " + resp.registrationCenters[j].perKioskProcessTime);
 
                     //This request is to retrieve the working days of the center
                     OkHttpClient client2 = new OkHttpClient().newBuilder()
                         .build();
                     Request request2 = new Request.Builder()
-                        .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/workingdays/" + result.response.registrationCenters[j].id + "/eng")
+                        .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/workingdays/" + resp.registrationCenters[j].id + "/eng")
                         .method("GET", null)
                         .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
                         .build();
@@ -77,7 +86,7 @@ public class Centers {
                         System.out.println("------------------------------");
                     }
 
-                    codesList.add(result.response.registrationCenters[j].id);
+                    codesList.add(resp.registrationCenters[j].id);
                     System.out.println("------------------------------");
                 }
                 String[] codes = codesList.stream().toArray(String[]::new);
@@ -97,11 +106,8 @@ public class Centers {
 
                 CenterDetailsCheck.checkCenter();
             }
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorCenters ex) {
+            System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -173,4 +179,10 @@ class WorkingDays {
 class ErrorsWorking {
     public String errorCode;
     public String message;
+}
+
+class ErrorCenters extends Exception {
+    public ErrorCenters (ResponseDataCenters result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }

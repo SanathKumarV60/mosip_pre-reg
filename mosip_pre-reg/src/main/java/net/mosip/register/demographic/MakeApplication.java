@@ -29,7 +29,7 @@ public class MakeApplication {
             .url("https://uat2.mosip.net//preregistration/v1/applications")
             .method("POST", body)
             .addHeader("Content-Type", "application/json")
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();

@@ -13,16 +13,13 @@ public class CenterDetailsCheck {
         checkCenter();
     }
 
-    public static void checkCenter() throws IOException {
-        new envManager();
-        Console console = System.console();
-
+    public static ResponseDetailsSelect checkCenter_call(String auth, String regCenterId) throws IOException, ErrorSelect {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
-            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/" + envManager.getEnv("regCenterId") + "/eng")
+            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/" + regCenterId + "/eng")
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -31,8 +28,21 @@ public class CenterDetailsCheck {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataSelect result = objectMapper.readValue(responseBody, ResponseDataSelect.class);
 
-        if (result.errors == null){
-            System.out.println("Selected Center: " + result.response.registrationCenters[0].name);
+        if (result.errors == null) {
+            return result.response;
+        } else {
+            throw new ErrorSelect(result);
+        }
+    }
+
+    public static void checkCenter() throws IOException {
+
+        try {
+            ResponseDetailsSelect resp = checkCenter_call(envManager.getEnv("auth"), envManager.getEnv("regCenterId"));
+
+            Console console = System.console();
+            
+            System.out.println("Selected Center: " + resp.registrationCenters[0].name);
             while (true) {
                 String cont = console.readLine("Would you like to proceed with this Center? (Y/N): ");
                 System.out.println("------------------------------");
@@ -46,11 +56,8 @@ public class CenterDetailsCheck {
                     System.out.println("------------------------------");
                 }
             }
-        } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+        } catch (ErrorSelect ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -128,4 +135,10 @@ class RegistrationCentersSelect {
 class ErrorsSelect {
     public String errorCode;
     public String message;
+}
+
+class ErrorSelect extends Exception {
+    public ErrorSelect (ResponseDataSelect result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }
