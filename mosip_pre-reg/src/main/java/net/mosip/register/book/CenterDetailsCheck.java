@@ -10,7 +10,8 @@ import okhttp3.*;
 
 public class CenterDetailsCheck {
     public static void main(String[] args) throws IOException {
-        checkCenter();
+        //checkCenter();
+        all_details(envManager.getEnv("regCenterId"));
     }
 
     public static ResponseDetailsSelect checkCenter_call(String auth, String regCenterId) throws IOException, ErrorSelect {
@@ -62,13 +63,11 @@ public class CenterDetailsCheck {
         }
     }
 
-    public static void all_details(String auth, String reg_cen_id) throws IOException {
-        new envManager();
-
+    public static ResponseDetailsSelect all_details_call(String auth, String regCenterId) throws IOException, ErrorSelect {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
-            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/" + reg_cen_id + "/eng")
+            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/" + regCenterId + "/eng")
             .method("GET", null)
             .addHeader("Cookie", "Authorization=" + auth)
             .build();
@@ -79,15 +78,23 @@ public class CenterDetailsCheck {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataSelect result = objectMapper.readValue(responseBody, ResponseDataSelect.class);
 
-        if (result.errors == null){
-            System.out.println("Name of Center: " + result.response.registrationCenters[0].name);
-            System.out.println("Contact: " + result.response.registrationCenters[0].contactPerson + " (" + result.response.registrationCenters[0].contactPhone + ")");
-            System.out.println("------------------------------");
+        if (result.errors == null) {
+            return result.response;
         } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+            throw new ErrorSelect(result);
+        }
+    }
+
+    public static void all_details(String reg_cen_id) throws IOException {
+
+        try {
+            ResponseDetailsSelect resp = all_details_call(envManager.getEnv("auth"), reg_cen_id);
+
+            System.out.println("Name of Center: " + resp.registrationCenters[0].name);
+            System.out.println("Contact: " + resp.registrationCenters[0].contactPerson + " (" + resp.registrationCenters[0].contactPhone + ")");
+            System.out.println("------------------------------");
+        } catch (ErrorSelect ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }

@@ -123,6 +123,7 @@ public class Display {
                         System.out.println("Status: " + x);
                         System.out.println("Postal Code: " + resp.getBasicDetails()[i].getDemographicMetadata().getPostalCode());
                         System.out.println("Pre Registration Center ID: " + resp.getBasicDetails()[i].getBookingMetadata().getRegistration_center_id());
+                        envManager.updateEnv("regCenterId", resp.getBasicDetails()[i].getBookingMetadata().getRegistration_center_id());
                         System.out.println("Appointment Date: " + resp.getBasicDetails()[i].getBookingMetadata().getAppointment_date());
                         System.out.println("Booking From: " + resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_from());
                         System.out.println("Booking Till: " + resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_to());

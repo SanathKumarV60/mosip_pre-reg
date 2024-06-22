@@ -15,7 +15,8 @@ import net.mosip.applications.Display;
 
 public class Retrieve {
     public static void main(String[] args) throws IOException {
-        retrieve();
+        //retrieve();
+        updateAllEnv(envManager.getEnv("applicationId"));
     }
 
     public static ResponseDetailsRetrieve retrieve_call(String auth, String applicationId) throws IOException, ErrorRetrieve {
@@ -40,9 +41,37 @@ public class Retrieve {
         }
     }
 
+    public static void updateAllEnv (String applicationId) throws IOException {
+        try{
+            ResponseDetailsRetrieve resp = retrieve_call(envManager.getEnv("auth"), applicationId);
+
+            envManager.updateEnv("applicationId", resp.preRegistrationId);
+            envManager.updateEnv("name", resp.demographicDetails.identity.fullName[0].value);
+            envManager.updateEnv("dob", resp.demographicDetails.identity.dateOfBirth);
+            envManager.updateEnv("gender", resp.demographicDetails.identity.gender[0].value);
+            envManager.updateEnv("addressLine", resp.demographicDetails.identity.addressLine1[0].value);
+            envManager.updateEnv("region", resp.demographicDetails.identity.region[0].value);
+            envManager.updateEnv("province", resp.demographicDetails.identity.province[0].value);
+            envManager.updateEnv("city", resp.demographicDetails.identity.city[0].value);
+            envManager.updateEnv("zone", resp.demographicDetails.identity.zone[0].value);
+            envManager.updateEnv("pincode", resp.demographicDetails.identity.postalCode);
+            envManager.updateEnv("phoneNumber", resp.demographicDetails.identity.phone);
+            envManager.updateEnv("email", resp.demographicDetails.identity.email);
+            envManager.updateEnv("status", resp.statusCode);
+            envManager.updateEnv("residenceStat", resp.demographicDetails.identity.residenceStatus[0].value);
+            
+        } catch (ErrorRetrieve ex) {
+            System.err.println(ex.getMessage());
+            System.out.println("------------------------------");
+        }
+
+    }
+
+
     public static void retrieve() throws IOException {
         try {
             ResponseDetailsRetrieve resp = retrieve_call(envManager.getEnv("auth"), envManager.getEnv("applicationId"));
+
             System.out.println("Please Check your details: ");
             System.out.println("------------------------------");
             System.out.println("Application ID: " + resp.preRegistrationId);
@@ -71,7 +100,7 @@ public class Retrieve {
             envManager.updateEnv("phoneNumber", resp.demographicDetails.identity.phone);
             System.out.println("E-mail: " + resp.demographicDetails.identity.email);
             envManager.updateEnv("email", resp.demographicDetails.identity.email);
-            System.out.println("Status: " + resp.statusCode);;
+            System.out.println("Status: " + resp.statusCode);
             envManager.updateEnv("status", resp.statusCode);
             System.out.println("------------------------------");
 
@@ -109,7 +138,7 @@ public class Retrieve {
                         System.err.println("ERROR: Application ID has already been booked!\nPlease cancel the current booking to book again!");
                         System.out.println("------------------------------");
                         Display.booked_details(applicationId);
-                        CenterDetailsCheck.all_details(envManager.getEnv("auth"), envManager.getEnv("regCenterId"));
+                        CenterDetailsCheck.all_details(envManager.getEnv("regCenterId"));
                     } else {
                         RunBooking.runBooking(applicationId);
                     }

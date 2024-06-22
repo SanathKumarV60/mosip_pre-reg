@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class envManager {
 
-    private static final String ENV_FILE_PATH = "src/main/java/net/mosip/.env";
+    private static final String ENV_FILE_PATH = "../src/main/java/net/mosip/.env";
 
     public static void main(String[] args) {
         try {

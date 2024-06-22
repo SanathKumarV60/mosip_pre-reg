@@ -73,7 +73,7 @@ public class Notify {
 
         //  THIS NEEDS TO BE REPLACED WITH THE DOCUMENT THAT IS CREATED
         //  BY THE SYSTEM WITH THE QR CODE AND CONFIRMATION
-        String filePath = "21302359657364.pdf";
+        String filePath = "../demo_ack.pdf";
 
         try {
             ResponseDetailsNotif resp = getNotif_call(envManager.getEnv("auth"), envManager.getEnv("name"), applicationId, envManager.getEnv("dateReq"), appointmentTime, phone, email, filePath);

@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.register.demographic.Retrieve;
 import okhttp3.*;
 
 public class DocumentFetch {
@@ -30,7 +31,8 @@ public class DocumentFetch {
         if (result.errors == null) {
             return result.response;
         } else if (result.errors[0].errorCode.equals("PRG_PAM_DOC_005")) {
-            envManager.updateEnv("applicationId", applicationId);
+            Retrieve.updateAllEnv(applicationId);
+            ApplicantType.getType(applicationId);
             RunUpload.runUpload(applicationId); 
             return null;
         } else {

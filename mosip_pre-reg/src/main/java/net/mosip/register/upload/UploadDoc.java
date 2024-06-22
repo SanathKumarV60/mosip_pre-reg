@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
@@ -40,18 +41,24 @@ public class UploadDoc {
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
 
-        //Create json Parse using classes
-        ObjectMapper objectMapper = new ObjectMapper();
-        ResponseDataUpload result = objectMapper.readValue(responseBody, ResponseDataUpload.class);
+        try {
+            //Create json Parse using classes
+            ObjectMapper objectMapper = new ObjectMapper();
+            ResponseDataUpload result = objectMapper.readValue(responseBody, ResponseDataUpload.class);
 
-        if (result.errors == null) {
-            return result.response;
-        } else {
-            throw new ErrorUpload(result);
+            if (result.errors == null) {
+                return result.response;
+            } else {
+                throw new ErrorUpload(result);
+            }
+        } catch (JsonParseException e) {
+            System.err.println("ERROR: File Too Large!");
+            System.out.println("------------------------------");
+            return null;
         }
     }
 
-    public static void uploadDoc(String doc, String type) throws IOException {
+    public static String uploadDoc(String doc, String type) throws IOException {
         Console console = System.console();
         String refId = console.readLine("Enter Document Reference ID: ");
         envManager.updateEnv(doc + "docRefId", refId);
@@ -66,14 +73,21 @@ public class UploadDoc {
         try {
             ResponseDetailsUpload resp = uploadDoc_call(envManager.getEnv("auth"), doc, type, refId, fileName, filePath, envManager.getEnv("applicationId"));
 
+            if (resp == null) {
+                return "";
+            }
+
             System.out.println("MESSAGE: Document uploaded! Details:");
             System.out.println("Document Name: " + resp.docName);
             System.out.println("Document ID: " + resp.docId);
             envManager.updateEnv(doc + "docId", resp.docId);
             System.out.println("------------------------------");
+            
+            return null;
         } catch (ErrorUpload ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
+            return "";
         }
     }
 
