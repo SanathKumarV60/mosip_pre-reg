@@ -36,6 +36,28 @@ public class Centers {
         }
     }
 
+    public static ResponseDetailsWorking workingDays_call(String auth, String regCenterId) throws IOException, ErrorWorking {
+        //This request is to retrieve the working days of the center
+        OkHttpClient client2 = new OkHttpClient().newBuilder()
+            .build();
+        Request request2 = new Request.Builder()
+            .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/workingdays/" + regCenterId + "/eng")
+            .method("GET", null)
+            .addHeader("Cookie", "Authorization=" + auth)
+            .build();
+        Response response2 = client2.newCall(request2).execute();
+        String responseBody2 = response2.body().string();
+
+        ObjectMapper objectMapper2 = new ObjectMapper();
+        ResponseWorking result2 = objectMapper2.readValue(responseBody2, ResponseWorking.class);
+
+        if (result2.errors == null) {
+            return result2.response;
+        } else{
+            throw new ErrorWorking(result2);
+        }
+    }
+
     public static void getCenters() throws IOException {
         try {
             ResponseDetailsCenters resp = getCenters_call(envManager.getEnv("auth"), envManager.getEnv("pincode"));
@@ -57,32 +79,17 @@ public class Centers {
                     System.out.println("Number of kiosks: " + resp.registrationCenters[j].numberOfKiosks);
                     System.out.println("Per Kiosk Process Time: " + resp.registrationCenters[j].perKioskProcessTime);
 
-                    //This request is to retrieve the working days of the center
-                    OkHttpClient client2 = new OkHttpClient().newBuilder()
-                        .build();
-                    Request request2 = new Request.Builder()
-                        .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/workingdays/" + resp.registrationCenters[j].id + "/eng")
-                        .method("GET", null)
-                        .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
-                        .build();
-                    Response response2 = client2.newCall(request2).execute();
-                    String responseBody2 = response2.body().string();
+                    try {
+                        ResponseDetailsWorking resp2 = workingDays_call(envManager.getEnv("auth"), resp.registrationCenters[j].id);
 
-                    ObjectMapper objectMapper2 = new ObjectMapper();
-                    ResponseWorking result2 = objectMapper2.readValue(responseBody2, ResponseWorking.class);
-
-                    if(result2.errors == null) {
                         System.out.print("Working Days: ");
-                        for(int k = 0; k < result2.response.workingdays.length - 1; k++){
-                            System.out.print(result2.response.workingdays[k].name + ", ");
+                        for(int k = 0; k < resp2.workingdays.length - 1; k++){
+                            System.out.print(resp2.workingdays[k].name + ", ");
                         }
-                        System.out.print(result2.response.workingdays[result2.response.workingdays.length - 1].name);
+                        System.out.print(resp2.workingdays[resp2.workingdays.length - 1].name);
                         System.out.println();
-                    } else {
-                        int l = result2.errors.length;
-                        for(int k = 0; k < l; k++){
-                            System.err.println("ERROR: " + result2.errors[k].errorCode + ": " + result2.errors[k].message);
-                        }
+                    } catch (ErrorWorking ex) {
+                        System.err.println(ex.getMessage());
                         System.out.println("------------------------------");
                     }
 
@@ -183,6 +190,12 @@ class ErrorsWorking {
 
 class ErrorCenters extends Exception {
     public ErrorCenters (ResponseDataCenters result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
+}
+
+class ErrorWorking extends Exception {
+    public ErrorWorking (ResponseWorking result) {
         super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

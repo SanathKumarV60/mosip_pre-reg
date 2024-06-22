@@ -14,24 +14,21 @@ public class ApplicantType {
         getType(envManager.getEnv("applicationId"));
     }
 
-    public static void getType(String applicationId) throws IOException {
-        new envManager();
-
+    public static ResponseDetailsApplicantType getType_call(String auth, String residenceStat, String dob, String gender) throws IOException, ErrorApplicantType {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
         String formattedTime = formatter.format(gmtTime);
-        envManager.updateEnv("currentTime", formattedTime);
 
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create("{\r\n    \"id\": \"mosip.applicanttype.fetch\",\r\n    \"request\": {\r\n        \"attributes\": [\r\n            {\r\n                \"attribute\": \"individualTypeCode\",\r\n                \"value\": \"" + envManager.getEnv("residenceStat") + "\"\r\n            },\r\n            {\r\n                \"attribute\": \"dateofbirth\",\r\n                \"value\": \"" + dateConverter(envManager.getEnv("dob")) + "\"\r\n            },\r\n            {\r\n                \"attribute\": \"genderCode\",\r\n                \"value\": \"" + envManager.getEnv("gender") + "\"\r\n            },\r\n            {\r\n                \"attribute\": \"biometricAvailable\",\r\n                \"value\": false\r\n            }\r\n        ]\r\n    },\r\n    \"metadata\": {},\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"" + formattedTime + "\"\r\n}", mediaType);
+        RequestBody body = RequestBody.create("{\r\n    \"id\": \"mosip.applicanttype.fetch\",\r\n    \"request\": {\r\n        \"attributes\": [\r\n            {\r\n                \"attribute\": \"individualTypeCode\",\r\n                \"value\": \"" + residenceStat + "\"\r\n            },\r\n            {\r\n                \"attribute\": \"dateofbirth\",\r\n                \"value\": \"" + dob + "\"\r\n            },\r\n            {\r\n                \"attribute\": \"genderCode\",\r\n                \"value\": \"" + gender + "\"\r\n            },\r\n            {\r\n                \"attribute\": \"biometricAvailable\",\r\n                \"value\": false\r\n            }\r\n        ]\r\n    },\r\n    \"metadata\": {},\r\n    \"version\": \"1.0\",\r\n    \"requesttime\": \"" + formattedTime + "\"\r\n}", mediaType);
         Request request = new Request.Builder()
             .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/getApplicantType")
             .method("POST", body)
             .addHeader("Content-Type", "application/json")
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -40,13 +37,20 @@ public class ApplicantType {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataApplicantType result = objectMapper.readValue(responseBody, ResponseDataApplicantType.class);
 
-        if (result.errors == null){
-            envManager.updateEnv("applicantType", result.response.applicantType.applicantTypeCode);
+        if (result.errors == null) {
+            return result.response;
         } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
-            }
+            throw new ErrorApplicantType(result);
+        }
+    }
+
+    public static void getType(String applicationId) throws IOException {
+        try {
+            ResponseDetailsApplicantType resp = getType_call(envManager.getEnv("auth"), envManager.getEnv("residenceStat"), dateConverter(envManager.getEnv("dob")), envManager.getEnv("gender"));
+
+            envManager.updateEnv("applicantType", resp.applicantType.applicantTypeCode);
+        } catch (ErrorApplicantType ex) {
+            System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
@@ -91,3 +95,8 @@ class ErrorsApplicantType {
     public String message;
 }
   
+class ErrorApplicantType extends Exception {
+    public ErrorApplicantType (ResponseDataApplicantType result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
+}

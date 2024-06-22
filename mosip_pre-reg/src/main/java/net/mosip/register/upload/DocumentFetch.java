@@ -12,15 +12,13 @@ public class DocumentFetch {
         docFetch(envManager.getEnv("applicationId"));
     }
 
-    public static void docFetch(String applicationId) throws IOException {
-        new envManager();
-
+    public static ResponseDetailsFetch docFetch_call(String auth, String applicationId) throws IOException, ErrorFetch {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
             .url("https://uat2.mosip.net//preregistration/v1/documents/preregistration/" + applicationId)
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();
@@ -29,27 +27,41 @@ public class DocumentFetch {
         ObjectMapper objectMapper = new ObjectMapper();
         ResponseDataFetch result = objectMapper.readValue(responseBody, ResponseDataFetch.class);
 
-        if(result.errors == null){
-            System.out.println("MESSAGE: Documents already given for " + applicationId + "!");
-            System.out.println("------------------------------");
-            int l = result.response.documentsMetaData.length;
-            for(int i = 0; i < l; i++){
-                System.out.println("Document For: " + result.response.documentsMetaData[i].docCatCode);
-                System.out.println("Document Type: " + result.response.documentsMetaData[i].docTypCode);
-                System.out.println("Document Name: " + result.response.documentsMetaData[i].docName);
-                System.out.println("Document ID: " + result.response.documentsMetaData[i].documentId);
-                System.out.println("Document Reference ID: " + result.response.documentsMetaData[i].docRefId);
-                System.out.println("------------------------------");
-            }
+        if (result.errors == null) {
+            return result.response;
         } else if (result.errors[0].errorCode.equals("PRG_PAM_DOC_005")) {
             envManager.updateEnv("applicationId", applicationId);
-            RunUpload.runUpload(applicationId);
+            RunUpload.runUpload(applicationId); 
+            return null;
         } else {
-            int l = result.errors.length;
-            for(int i = 0; i < l; i++){
-                System.err.println("ERROR: " + result.errors[i].errorCode + ": " + result.errors[i].message);
+            throw new ErrorFetch(result);
+        }
+    }
+
+    public static String docFetch(String applicationId) throws IOException {
+        try {
+            ResponseDetailsFetch resp = docFetch_call(envManager.getEnv("auth"), applicationId);
+
+            if (resp == null) {
+                return "";
             }
+
+            System.out.println("MESSAGE: Documents already given for " + applicationId + "!");
             System.out.println("------------------------------");
+            int l = resp.documentsMetaData.length;
+            for(int i = 0; i < l; i++){
+                System.out.println("Document For: " + resp.documentsMetaData[i].docCatCode);
+                System.out.println("Document Type: " + resp.documentsMetaData[i].docTypCode);
+                System.out.println("Document Name: " + resp.documentsMetaData[i].docName);
+                System.out.println("Document ID: " + resp.documentsMetaData[i].documentId);
+                System.out.println("Document Reference ID: " + resp.documentsMetaData[i].docRefId);
+                System.out.println("------------------------------");
+            }
+            return null;
+        } catch (ErrorFetch ex) {
+            System.err.println(ex.getMessage());
+            System.out.println("------------------------------");
+            return "";
         }
     }
 }
@@ -78,4 +90,10 @@ class DocumentsMetaDataFetch {
 class ErrorsFetch {
     public String errorCode;
     public String message;
+}
+
+class ErrorFetch extends Exception {
+    public ErrorFetch (ResponseDataFetch result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
 }
