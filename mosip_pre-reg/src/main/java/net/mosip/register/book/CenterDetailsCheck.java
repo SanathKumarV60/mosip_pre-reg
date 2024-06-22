@@ -62,7 +62,7 @@ public class CenterDetailsCheck {
         }
     }
 
-    public static void all_details(String reg_cen_id) throws IOException {
+    public static void all_details(String auth, String reg_cen_id) throws IOException {
         new envManager();
 
         OkHttpClient client = new OkHttpClient().newBuilder()
@@ -70,7 +70,7 @@ public class CenterDetailsCheck {
         Request request = new Request.Builder()
             .url("https://uat2.mosip.net//preregistration/v1//proxy/masterdata/registrationcenters/" + reg_cen_id + "/eng")
             .method("GET", null)
-            .addHeader("Cookie", "Authorization=" + envManager.getEnv("auth"))
+            .addHeader("Cookie", "Authorization=" + auth)
             .build();
         Response response = client.newCall(request).execute();
         String responseBody = response.body().string();

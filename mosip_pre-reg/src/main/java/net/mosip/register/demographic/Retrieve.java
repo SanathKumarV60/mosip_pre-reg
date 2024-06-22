@@ -109,7 +109,7 @@ public class Retrieve {
                         System.err.println("ERROR: Application ID has already been booked!\nPlease cancel the current booking to book again!");
                         System.out.println("------------------------------");
                         Display.booked_details(applicationId);
-                        CenterDetailsCheck.all_details(envManager.getEnv("regCenterId"));
+                        CenterDetailsCheck.all_details(envManager.getEnv("auth"), envManager.getEnv("regCenterId"));
                     } else {
                         RunBooking.runBooking(applicationId);
                     }

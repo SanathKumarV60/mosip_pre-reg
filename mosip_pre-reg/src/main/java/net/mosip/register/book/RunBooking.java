@@ -15,6 +15,7 @@ public class RunBooking {
         Centers.getCenters();
         TimeSlots.getSlots();
         Appointment.getAppointment(applicationId);
+        envManager.updateEnv("status", "Booked");
         RunCofirmation.getConfirmation(applicationId);
     }
 }
