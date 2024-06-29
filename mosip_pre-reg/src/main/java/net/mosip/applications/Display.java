@@ -16,34 +16,34 @@ public class Display {
             ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
 
             int i = 0;
-            int records = Integer.parseInt(resp.getTotalRecords());
-            System.out.println("No. of Records: " + resp.getTotalRecords());
+            int records = Integer.parseInt(resp.totalRecords);
+            System.out.println("No. of Records: " + resp.totalRecords);
             System.out.println("------------------------------");
             while (i < records) {
-                System.out.println("Application ID: " + resp.getBasicDetails()[i].getPreRegistrationId());
-                System.out.println("Full Name: " + resp.getBasicDetails()[i].getDemographicMetadata().getFullName()[0].getValue());
-                String x = resp.getBasicDetails()[i].getStatusCode();
+                System.out.println("Application ID: " + resp.basicDetails[i].preRegistrationId);
+                System.out.println("Full Name: " + resp.basicDetails[i].demographicMetadata.fullName[0].value);
+                String x = resp.basicDetails[i].statusCode;
                 System.out.println("Status: " + x);
-                System.out.println("Postal Code: " + resp.getBasicDetails()[i].getDemographicMetadata().getPostalCode());
+                System.out.println("Postal Code: " + resp.basicDetails[i].demographicMetadata.postalCode);
                 if (x.equals("Pending_Appointment")) {
                     // do nothing
                 } else if (x.equals("Booked")) {
-                    System.out.println("Pre Registration Center ID: " + resp.getBasicDetails()[i].getBookingMetadata().getRegistration_center_id());
-                    System.out.println("Appointment Date: " + resp.getBasicDetails()[i].getBookingMetadata().getAppointment_date());
-                    System.out.println("Booking From: " + resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_from());
-                    System.out.println("Booking Till: " + resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_to());
+                    System.out.println("Pre Registration Center ID: " + resp.basicDetails[i].bookingMetadata.registration_center_id);
+                    System.out.println("Appointment Date: " + resp.basicDetails[i].bookingMetadata.appointment_date);
+                    System.out.println("Booking From: " + resp.basicDetails[i].bookingMetadata.time_slot_from);
+                    System.out.println("Booking Till: " + resp.basicDetails[i].bookingMetadata.time_slot_to);
                 } else if (x.equals("Expired")) {
                     System.err.println("The booking has expired, please rebook!");
                 } else {
-                    System.err.println("ERROR: Invalid Status Code for Application ID: " + resp.getBasicDetails()[i].getPreRegistrationId());
+                    System.err.println("ERROR: Invalid Status Code for Application ID: " + resp.basicDetails[i].preRegistrationId);
                 }
 
-                if (resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress() == null) {
+                if (resp.basicDetails[i].demographicMetadata.proofOfAddress == null) {
                     System.out.println("MESSAGE: No POA Given!");
                 } else {
-                    System.out.println("POA Type: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocTypCode());
-                    System.out.println("POA Document Name: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocName());
-                    System.out.println("POA Document Ref ID: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocRefId());
+                    System.out.println("POA Type: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docTypCode);
+                    System.out.println("POA Document Name: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docName);
+                    System.out.println("POA Document Ref ID: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docRefId);
                 }
                 System.out.println("------------------------------");
                 i++;
@@ -63,33 +63,33 @@ public class Display {
             
             int count = 0;
             int i = 0;
-            int records = Integer.parseInt(resp.getTotalRecords());
+            int records = Integer.parseInt(resp.totalRecords);
             while (i < records) {
-                String x = resp.getBasicDetails()[i].getStatusCode();
+                String x = resp.basicDetails[i].statusCode;
                 if (x.equals("Pending_Appointment") || x.equals("Expired")) {
                     // do nothing
                 } else if (x.equals("Booked")) {
-                    System.out.println("Application ID: " + resp.getBasicDetails()[i].getPreRegistrationId());
-                    System.out.println("Full Name: " + resp.getBasicDetails()[i].getDemographicMetadata().getFullName()[0].getValue());
+                    System.out.println("Application ID: " + resp.basicDetails[i].preRegistrationId);
+                    System.out.println("Full Name: " + resp.basicDetails[i].demographicMetadata.fullName[0].value);
                     System.out.println("Status: " + x);
-                    System.out.println("Postal Code: " + resp.getBasicDetails()[i].getDemographicMetadata().getPostalCode());
-                    System.out.println("Pre Registration Center ID: " + resp.getBasicDetails()[i].getBookingMetadata().getRegistration_center_id());
-                    System.out.println("Appointment Date: " + resp.getBasicDetails()[i].getBookingMetadata().getAppointment_date());
-                    System.out.println("Booking From: " + resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_from());
-                    System.out.println("Booking Till: " + resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_to());
+                    System.out.println("Postal Code: " + resp.basicDetails[i].demographicMetadata.postalCode);
+                    System.out.println("Pre Registration Center ID: " + resp.basicDetails[i].bookingMetadata.registration_center_id);
+                    System.out.println("Appointment Date: " + resp.basicDetails[i].bookingMetadata.appointment_date);
+                    System.out.println("Booking From: " + resp.basicDetails[i].bookingMetadata.time_slot_from);
+                    System.out.println("Booking Till: " + resp.basicDetails[i].bookingMetadata.time_slot_to);
                     count++;
-                    if (resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress() == null) {
+                    if (resp.basicDetails[i].demographicMetadata.proofOfAddress == null) {
                         System.out.println("MESSAGE: No POA Given!");
                     } else {
                         if (x.equals("Booked")) {
-                            System.out.println("POA Type: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocTypCode());
-                            System.out.println("POA Document Name: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocName());
-                            System.out.println("POA Document Ref ID: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocRefId());
+                            System.out.println("POA Type: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docTypCode);
+                            System.out.println("POA Document Name: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docName);
+                            System.out.println("POA Document Ref ID: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docRefId);
                         }
                     }
                     System.out.println("------------------------------");
                 } else {
-                    System.err.println("ERROR: Invalid Status Code for Application ID: " + resp.getBasicDetails()[i].getPreRegistrationId());
+                    System.err.println("ERROR: Invalid Status Code for Application ID: " + resp.basicDetails[i].preRegistrationId);
                     System.out.println("------------------------------");
                 }
                 i++;
@@ -109,37 +109,37 @@ public class Display {
             ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
 
             int i = 0;
-            int records = Integer.parseInt(resp.getTotalRecords());
+            int records = Integer.parseInt(resp.totalRecords);
             while (i < records) {
-                String x = resp.getBasicDetails()[i].getStatusCode();
-                if (resp.getBasicDetails()[i].getPreRegistrationId().equals(applicationId)) {
+                String x = resp.basicDetails[i].statusCode;
+                if (resp.basicDetails[i].preRegistrationId.equals(applicationId)) {
                     if (x.equals("Pending_Appointment")) {
                         System.out.println("MESSAGE: The status of the Pre Registration ID is still Pending for Appointment.");
                     } else if (x.equals("Expired")) {
                         System.out.println("MESSAGE: The status of the Pre Registration ID is Expired. Please re-book.");
                     } else if (x.equals("Booked")) {
-                        System.out.println("Application ID: " + resp.getBasicDetails()[i].getPreRegistrationId());
-                        System.out.println("Full Name: " + resp.getBasicDetails()[i].getDemographicMetadata().getFullName()[0].getValue());
+                        System.out.println("Application ID: " + resp.basicDetails[i].preRegistrationId);
+                        System.out.println("Full Name: " + resp.basicDetails[i].demographicMetadata.fullName[0].value);
                         System.out.println("Status: " + x);
-                        System.out.println("Postal Code: " + resp.getBasicDetails()[i].getDemographicMetadata().getPostalCode());
-                        System.out.println("Pre Registration Center ID: " + resp.getBasicDetails()[i].getBookingMetadata().getRegistration_center_id());
-                        envManager.updateEnv("regCenterId", resp.getBasicDetails()[i].getBookingMetadata().getRegistration_center_id());
-                        System.out.println("Appointment Date: " + resp.getBasicDetails()[i].getBookingMetadata().getAppointment_date());
-                        System.out.println("Booking From: " + resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_from());
-                        System.out.println("Booking Till: " + resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_to());
-                        if (resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress() == null) {
+                        System.out.println("Postal Code: " + resp.basicDetails[i].demographicMetadata.postalCode);
+                        System.out.println("Pre Registration Center ID: " + resp.basicDetails[i].bookingMetadata.registration_center_id);
+                        envManager.updateEnv("regCenterId", resp.basicDetails[i].bookingMetadata.registration_center_id);
+                        System.out.println("Appointment Date: " + resp.basicDetails[i].bookingMetadata.appointment_date);
+                        System.out.println("Booking From: " + resp.basicDetails[i].bookingMetadata.time_slot_from);
+                        System.out.println("Booking Till: " + resp.basicDetails[i].bookingMetadata.time_slot_to);
+                        if (resp.basicDetails[i].demographicMetadata.proofOfAddress == null) {
                             System.out.println("MESSAGE: No POA Given!");
                         } else {
-                            System.out.println("POA Type: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocTypCode());
-                            System.out.println("POA Document Name: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocName());
-                            System.out.println("POA Document Ref ID: " + resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress().getDocRefId());
+                            System.out.println("POA Type: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docTypCode);
+                            System.out.println("POA Document Name: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docName);
+                            System.out.println("POA Document Ref ID: " + resp.basicDetails[i].demographicMetadata.proofOfAddress.docRefId);
                         }
                         System.out.println("------------------------------");
                     } else {
-                        System.err.println("ERROR: Invalid Status Code for Application ID: " + resp.getBasicDetails()[i].getPreRegistrationId());
+                        System.err.println("ERROR: Invalid Status Code for Application ID: " + resp.basicDetails[i].preRegistrationId);
                     }
                     break;
-                } else if (resp.getBasicDetails()[i].getPreRegistrationId().equals(applicationId) && x.equals("Expired")) {
+                } else if (resp.basicDetails[i].preRegistrationId.equals(applicationId) && x.equals("Expired")) {
                     System.err.println("The booking has expired, please rebook!");
                 } else {
                     i++;
@@ -156,14 +156,14 @@ public class Display {
             ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
 
             int i = 0;
-            int records = Integer.parseInt(resp.getTotalRecords());
+            int records = Integer.parseInt(resp.totalRecords);
             while (i < records) {
-                if (resp.getBasicDetails()[i].getPreRegistrationId().equals(applicationId)) {
+                if (resp.basicDetails[i].preRegistrationId.equals(applicationId)) {
                     envManager.updateEnv("applicationId", applicationId);
-                    envManager.updateEnv("regCenterId", resp.getBasicDetails()[i].getBookingMetadata().getRegistration_center_id());
-                    envManager.updateEnv("dateReq", resp.getBasicDetails()[i].getBookingMetadata().getAppointment_date());
-                    envManager.updateEnv("fromTime", resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_from() + ":00");
-                    envManager.updateEnv("toTime", resp.getBasicDetails()[i].getBookingMetadata().getTime_slot_to() + ":00");
+                    envManager.updateEnv("regCenterId", resp.basicDetails[i].bookingMetadata.registration_center_id);
+                    envManager.updateEnv("dateReq", resp.basicDetails[i].bookingMetadata.appointment_date);
+                    envManager.updateEnv("fromTime", resp.basicDetails[i].bookingMetadata.time_slot_from + ":00");
+                    envManager.updateEnv("toTime", resp.basicDetails[i].bookingMetadata.time_slot_to + ":00");
                 }
                 i++;
             }
@@ -179,12 +179,12 @@ public class Display {
 
             int count = 0;
             int i = 0;
-            int records = Integer.parseInt(resp.getTotalRecords());
+            int records = Integer.parseInt(resp.totalRecords);
             while (i < records) {
-                if (resp.getBasicDetails()[i].getDemographicMetadata().getProofOfAddress() == null) {
-                    System.out.println("Application ID: " + resp.getBasicDetails()[i].getPreRegistrationId());
-                    System.out.println("Full Name: " + resp.getBasicDetails()[i].getDemographicMetadata().getFullName()[0].getValue());
-                    System.out.println("Postal Code: " + resp.getBasicDetails()[i].getDemographicMetadata().getPostalCode());
+                if (resp.basicDetails[i].demographicMetadata.proofOfAddress == null) {
+                    System.out.println("Application ID: " + resp.basicDetails[i].preRegistrationId);
+                    System.out.println("Full Name: " + resp.basicDetails[i].demographicMetadata.fullName[0].value);
+                    System.out.println("Postal Code: " + resp.basicDetails[i].demographicMetadata.postalCode);
                     System.out.println("MESSAGE: No POA Given!");
                     System.out.println("------------------------------");
                     count++;
@@ -205,14 +205,14 @@ public class Display {
 
             int count = 0;
             int i = 0;
-            int records = Integer.parseInt(resp.getTotalRecords());
+            int records = Integer.parseInt(resp.totalRecords);
             while (i < records) {
-                String x = resp.getBasicDetails()[i].getStatusCode();
+                String x = resp.basicDetails[i].statusCode;
                 if (!x.equals("Booked")) {
-                    System.out.println("Application ID: " + resp.getBasicDetails()[i].getPreRegistrationId());
-                    System.out.println("Full Name: " + resp.getBasicDetails()[i].getDemographicMetadata().getFullName()[0].getValue());
+                    System.out.println("Application ID: " + resp.basicDetails[i].preRegistrationId);
+                    System.out.println("Full Name: " + resp.basicDetails[i].demographicMetadata.fullName[0].value);
                     System.out.println("Status: " + x);
-                    System.out.println("Postal Code: " + resp.getBasicDetails()[i].getDemographicMetadata().getPostalCode());
+                    System.out.println("Postal Code: " + resp.basicDetails[i].demographicMetadata.postalCode);
                     System.out.println("------------------------------");
                     count++;
                 }

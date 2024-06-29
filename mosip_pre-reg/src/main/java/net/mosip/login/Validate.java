@@ -22,17 +22,22 @@ public class Validate {
             System.err.println("ERROR: Could not take in OTP!");
         }
 
-        String response = validateOtp(otp);
-        if (response.substring(0, 5).equals("ERROR")) {
-            System.err.println(response);
-        } else {
-            envManager.updateEnv("auth", response);
-            System.out.println("LOGGED IN SUCCESSFULLY!");
+        try {
+            String response = validateOtp(otp);
+            if (response.substring(0, 5).equals("ERROR")) {
+                System.err.println(response);
+            } else {
+                envManager.updateEnv("auth", response);
+                System.out.println("LOGGED IN SUCCESSFULLY!");
+            }
+            System.out.println("------------------------------");
+        } catch (Error | HeaderError ex) {
+            System.out.println(ex.getMessage());
+            System.out.println("------------------------------");
         }
-        System.out.println("------------------------------");
     }
 
-    public static String validateOtp(String otp) throws IOException{
+    public static String validateOtp(String otp) throws IOException, HeaderError, Error{
 
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -60,10 +65,10 @@ public class Validate {
                 return auth;
             }
             else{
-                return "ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!";
+                throw new HeaderError();
             }
         } else {
-            return "ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message;
+            throw new Error(result);
         }
     }
 }

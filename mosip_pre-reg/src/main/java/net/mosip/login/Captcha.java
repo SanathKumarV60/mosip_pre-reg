@@ -23,16 +23,21 @@ public class Captcha {
             System.out.println("------------------------------");
         }
         envManager.updateEnv("userId", userId);
-
-        String response = sendOtpWithCaptcha(userId);
-        if (response.substring(0, 5).equals("ERROR")) {
-            System.err.println(response);
-        } else {
-            envManager.updateEnv("auth", response);
+        
+        try { 
+            String response = sendOtpWithCaptcha(userId);
+            if (response.substring(0, 5).equals("ERROR")) {
+                System.err.println(response);
+            } else {
+                envManager.updateEnv("auth", response);
+            }
+        } catch (Error | HeaderError e) {
+            System.err.println(e.getMessage());
+            System.out.println("------------------------------");
         }
     }
 
-    public static String sendOtpWithCaptcha(String userId) throws IOException{
+    public static String sendOtpWithCaptcha(String userId) throws IOException, Error, HeaderError {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -59,10 +64,10 @@ public class Captcha {
                 return auth;
             }
             else{
-                return "ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!";
+                throw new HeaderError();
             }
         } else {
-                return "ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message;
+                throw new Error(result);
         }
     }
 }
@@ -83,4 +88,16 @@ class ResponseDetails {
 class Errors {
     public String errorCode;
     public String message;
+}
+
+class Error extends Exception {
+    public Error (ResponseData result) {
+        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
+    }
+}
+
+class HeaderError extends Exception {
+    public HeaderError () {
+        super ("ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!");
+    }
 }
