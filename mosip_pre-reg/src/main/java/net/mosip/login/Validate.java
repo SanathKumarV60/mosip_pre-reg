@@ -9,6 +9,8 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.login.validate.*;
+
 import okhttp3.*;
 
 public class Validate {
@@ -31,13 +33,13 @@ public class Validate {
                 System.out.println("LOGGED IN SUCCESSFULLY!");
             }
             System.out.println("------------------------------");
-        } catch (Error | HeaderError ex) {
+        } catch (ValidateError | ValidateHeaderError ex) {
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }
     }
 
-    public static String validateOtp(String otp) throws IOException, HeaderError, Error{
+    public static String validateOtp(String otp) throws IOException, ValidateHeaderError, ValidateError{
 
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -57,7 +59,7 @@ public class Validate {
         String responseBody = response.body().string();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        ResponseData result = objectMapper.readValue(responseBody, ResponseData.class);
+        ResponseDataValidate result = objectMapper.readValue(responseBody, ResponseDataValidate.class);
 
         if (result.errors == null) {        
             if(response.header("Set-Cookie") != null){
@@ -65,10 +67,10 @@ public class Validate {
                 return auth;
             }
             else{
-                throw new HeaderError();
+                throw new ValidateHeaderError();
             }
         } else {
-            throw new Error(result);
+            throw new ValidateError(result);
         }
     }
 }

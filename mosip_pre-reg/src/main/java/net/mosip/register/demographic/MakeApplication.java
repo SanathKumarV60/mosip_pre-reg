@@ -8,6 +8,8 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.demographic.makeApplication.*;
+
 import okhttp3.*;
 
 public class MakeApplication {
@@ -15,7 +17,7 @@ public class MakeApplication {
         makeApplication();
     }
 
-    public static ResponseDetailsApp makeApplication_call(String auth, String name, String dob, String gender, String residenceStat, String addressLine, String region, String province, String city, String zone, String pincode, String phone, String email) throws IOException, ErrorApp {
+    public static ResponseDetailsApp makeApplication_call(String auth, String name, String dob, String gender, String residenceStat, String addressLine, String region, String province, String city, String zone, String pincode, String phone, String email) throws IOException, ApplicationException {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -41,7 +43,7 @@ public class MakeApplication {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorApp(result);
+            throw new ApplicationException(result);
         }
     }
 
@@ -53,96 +55,9 @@ public class MakeApplication {
             envManager.updateEnv("applicationId", resp.preRegistrationId);
             System.out.println("Creation Time: " + resp.createdDateTime);
             System.out.println("------------------------------");
-        } catch (ErrorApp ex) {
+        } catch (ApplicationException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataApp {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetailsApp response;
-    public ErrorsApp[] errors;
-}
-
-class ResponseDetailsApp {
-    public String preRegistrationId;
-    public String createdDateTime;
-    public String statusCode;
-    public String langCode;
-    public DemographicDetailsApp demographicDetails;
-}
-
-class DemographicDetailsApp {
-    public IdentityApp identity;
-}
-
-class IdentityApp {
-    public double IDSchemaVersion;
-    public FullNameApp[] fullName;
-    public String dateOfBirth;
-    public GenderApp[] gender;
-    public ResidenceApp[] residenceStatus;
-    public AddressVal[] addressLine1;
-    public RegionVal[] region;
-    public ProvinceVal[] province;
-    public CityVal[] city;
-    public ZoneVal[] zone;
-    public String postalCode;
-    public String phone;
-    public String email;
-}
-
-class FullNameApp {
-    public String language;
-    public String value;
-}
-
-class GenderApp {
-    public String language;
-    public String value;
-}
-
-class ResidenceApp {
-    public String language;
-    public String value;
-}
-
-class AddressVal {
-    public String language;
-    public String value;
-}
-
-class RegionVal {
-    public String language;
-    public String value;
-}
-
-class ProvinceVal {
-    public String language;
-    public String value;
-}
-
-class CityVal {
-    public String language;
-    public String value;
-}
-
-class ZoneVal {
-    public String language;
-    public String value;
-}
-
-class ErrorsApp {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorApp extends Exception {
-    public ErrorApp (ResponseDataApp result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

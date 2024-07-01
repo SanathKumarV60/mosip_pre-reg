@@ -6,6 +6,8 @@ import java.io.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.*;
+import net.mosip.models.delete.*;
+
 import net.mosip.envManager;
 import net.mosip.applications.Display;
 
@@ -15,7 +17,7 @@ public class Delete {
         System.out.println(response);
     }
 
-    public static ResponseDetails delete_application_call(String applicationId) throws IOException, Error {
+    public static ResponseDetailsDelete delete_application_call(String applicationId) throws IOException, DeleteException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         MediaType mediaType = MediaType.parse("text/plain");
@@ -30,12 +32,12 @@ public class Delete {
 
         //Create json Parse using classes
         ObjectMapper objectMapper = new ObjectMapper();
-        ResponseData result = objectMapper.readValue(responseBody, ResponseData.class);
+        ResponseDataDelete result = objectMapper.readValue(responseBody, ResponseDataDelete.class);
 
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new Error(result);
+            throw new DeleteException(result);
         }
     }
 
@@ -53,7 +55,7 @@ public class Delete {
         String applicationId = console.readLine("Enter Application to delete from above: ");
         System.out.println("------------------------------");
 
-        ResponseDetails resp = delete_application_call(applicationId);
+        ResponseDetailsDelete resp = delete_application_call(applicationId);
 
         System.out.println("Deleted application ID: " + resp.preRegistrationId + "!");
         System.out.println("Deleted By: " + resp.deletedBy);
@@ -61,35 +63,10 @@ public class Delete {
         System.out.println("------------------------------");
 
         return null;
-        } catch (Error ex) {
+        } catch (DeleteException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
             return "";
         }
-    }
-}
-
-class ResponseData {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetails response;
-    public Errors[] errors;
-}
-
-class ResponseDetails {
-    public String preRegistrationId;
-    public String deletedBy;
-    public String deletedDateTime;
-}
-
-class Errors {
-    public String errorCode;
-    public String message;
-}
-
-class Error extends Exception {
-    public Error (ResponseData result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

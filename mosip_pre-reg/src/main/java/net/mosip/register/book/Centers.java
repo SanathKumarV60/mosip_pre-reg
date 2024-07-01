@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.book.centers.*;
+
 import okhttp3.*;
 
 public class Centers {
@@ -14,7 +16,7 @@ public class Centers {
         getCenters();
     }
 
-    public static ResponseDetailsCenters getCenters_call(String auth, String pincode) throws IOException, ErrorCenters {
+    public static ResponseDetailsCenters getCenters_call(String auth, String pincode) throws IOException, CentersException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -32,11 +34,11 @@ public class Centers {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorCenters(result);
+            throw new CentersException(result);
         }
     }
 
-    public static ResponseDetailsWorking workingDays_call(String auth, String regCenterId) throws IOException, ErrorWorking {
+    public static ResponseDetailsWorking workingDays_call(String auth, String regCenterId) throws IOException, WorkingException {
         //This request is to retrieve the working days of the center
         OkHttpClient client2 = new OkHttpClient().newBuilder()
             .build();
@@ -54,7 +56,7 @@ public class Centers {
         if (result2.errors == null) {
             return result2.response;
         } else{
-            throw new ErrorWorking(result2);
+            throw new WorkingException(result2);
         }
     }
 
@@ -88,7 +90,7 @@ public class Centers {
                         }
                         System.out.print(resp2.workingdays[resp2.workingdays.length - 1].name);
                         System.out.println();
-                    } catch (ErrorWorking ex) {
+                    } catch (WorkingException ex) {
                         System.err.println(ex.getMessage());
                         System.out.println("------------------------------");
                     }
@@ -113,89 +115,9 @@ public class Centers {
 
                 CenterDetailsCheck.checkCenter();
             }
-        } catch (ErrorCenters ex) {
+        } catch (CentersException ex) {
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataCenters {
-    public String id;
-    public String version;
-    public String responsetime;
-    public String metadata;
-    public ResponseDetailsCenters response;
-    public ErrorsCenters[] errors;
-}
-
-class ResponseDetailsCenters {
-    public RegistrationCenters[] registrationCenters;
-}
-
-class RegistrationCenters {
-    public String id;
-    public String name;
-    public String centerTypeCode;
-    public String addressLine1;
-    public String addressLine2;
-    public String addressLine3;
-    public String latitude;
-    public String longitude;
-    public String locationCode;
-    public String holidayLocationCode;
-    public String contactPhone;
-    public String workingHours;
-    public String langCode;
-    public int numberOfKiosks;
-    public String perKioskProcessTime;
-    public String centerStartTime;
-    public String centerEndTime;
-    public String timeZone;
-    public String contactPerson;
-    public String lunchStartTime;
-    public String lunchEndTime;
-    public boolean isActive;
-    public String zoneCode;
-}
-
-class ErrorsCenters {
-    public String errorCode;
-    public String message;
-}
-
-class ResponseWorking {
-    public String id;
-    public String version;
-    public String responsetime;
-    public String metadata;
-    public ResponseDetailsWorking response;
-    public ErrorsWorking[] errors;
-}
-
-class ResponseDetailsWorking {
-    public WorkingDays[] workingdays;
-}
-
-class WorkingDays {
-    public String name;
-    public int order;
-    public String languageCode;
-}
-
-class ErrorsWorking {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorCenters extends Exception {
-    public ErrorCenters (ResponseDataCenters result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
-    }
-}
-
-class ErrorWorking extends Exception {
-    public ErrorWorking (ResponseWorking result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

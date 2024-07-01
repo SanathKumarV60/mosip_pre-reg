@@ -9,6 +9,8 @@ import java.io.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.*;
+import net.mosip.models.cancel.*;
+
 import net.mosip.envManager;
 import net.mosip.applications.Display;
 
@@ -17,7 +19,7 @@ public class Cancel {
         cancel_application();
     }
 
-    public static ResponseDetails cancel_application_call(String auth, String regCenterId, String date, String fromTime, String toTime, String applicationId) throws IOException, Error {
+    public static ResponseDetailsCancel cancel_application_call(String auth, String regCenterId, String date, String fromTime, String toTime, String applicationId) throws IOException, CancelError {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -38,12 +40,12 @@ public class Cancel {
 
         //Create json Parse using classes
         ObjectMapper objectMapper = new ObjectMapper();
-        ResponseData result = objectMapper.readValue(responseBody, ResponseData.class);
+        ResponseDataCancel result = objectMapper.readValue(responseBody, ResponseDataCancel.class);
 
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new Error(result);
+            throw new CancelError(result);
         }
 
     }
@@ -62,39 +64,15 @@ public class Cancel {
         Display.updateEnvCancel(applicationId);
 
         try {
-            ResponseDetails resp = cancel_application_call(envManager.getEnv("auth"), envManager.getEnv("regCenterId"), envManager.getEnv("reqDate"), envManager.getEnv("fromTime"), envManager.getEnv("toTime"), applicationId);
+            ResponseDetailsCancel resp = cancel_application_call(envManager.getEnv("auth"), envManager.getEnv("regCenterId"), envManager.getEnv("reqDate"), envManager.getEnv("fromTime"), envManager.getEnv("toTime"), applicationId);
             System.out.println("Cancelled Appointment for application ID: " + applicationId + "!");
             System.out.println("Transaction ID " + resp.transactionId);
             System.out.println("------------------------------");
             return null;
-        } catch (Error ex) {
+        } catch (CancelError ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
             return "";
         }
-    }
-}
-
-class ResponseData {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetails response;
-    public Errors[] errors;
-}
-
-class ResponseDetails {
-    public String transactionId;
-    public String message;
-}
-
-class Errors {
-    public String errorCode;
-    public String message;
-}
-
-class Error extends Exception {
-    public Error (ResponseData result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

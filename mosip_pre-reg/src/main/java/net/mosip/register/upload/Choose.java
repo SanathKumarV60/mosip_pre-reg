@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.upload.choose.*;
+
 import okhttp3.*;
 
 public class Choose {
@@ -14,7 +16,7 @@ public class Choose {
         chooseUploadType();
     }
 
-    public static ResponseDetailsChoose chooseUploadType_call(String auth, String applicantType) throws IOException, ErrorChoose {
+    public static ResponseDetailsChoose chooseUploadType_call(String auth, String applicantType) throws IOException, ChooseException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -32,7 +34,7 @@ public class Choose {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorChoose(result);
+            throw new ChooseException(result);
         }
     }
 
@@ -83,57 +85,9 @@ public class Choose {
             } else {
                 System.err.println("ERROR: No data found for applicant type: " + envManager.getEnv("applicantType"));
             }
-        } catch (ErrorChoose ex) {
+        } catch (ChooseException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataChoose {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetailsChoose response;
-    public MetaDataChoose[] metadata;
-    public ErrorsChoose[] errors;
-}
-
-class ResponseDetailsChoose {
-    public String appTypeCode;
-    public String langCode;
-    public boolean isActive;
-    public DocumentCategories[] documentCategories;
-}
-
-class DocumentCategories {
-    public String code;
-    public String name;
-    public String description;
-    public String langCode;
-    public boolean isActive;
-    public DocumentTypes[] documentTypes;
-}
-
-class DocumentTypes {
-    public String code;
-    public String name;
-    public String description;
-    public String langCode;
-    public boolean isActive;
-}
-
-class MetaDataChoose {
-    //Empty
-}
-
-class ErrorsChoose {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorChoose extends Exception {
-    public ErrorChoose (ResponseDataChoose result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

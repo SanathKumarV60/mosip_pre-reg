@@ -7,6 +7,8 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.upload.applicantType.*;
+
 import okhttp3.*;
 
 public class ApplicantType {
@@ -14,7 +16,7 @@ public class ApplicantType {
         getType(envManager.getEnv("applicationId"));
     }
 
-    public static ResponseDetailsApplicantType getType_call(String auth, String residenceStat, String dob, String gender) throws IOException, ErrorApplicantType {
+    public static ResponseDetailsApplicantType getType_call(String auth, String residenceStat, String dob, String gender) throws IOException, ApplicantTypeException {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -40,7 +42,7 @@ public class ApplicantType {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorApplicantType(result);
+            throw new ApplicantTypeException(result);
         }
     }
 
@@ -49,7 +51,7 @@ public class ApplicantType {
             ResponseDetailsApplicantType resp = getType_call(envManager.getEnv("auth"), envManager.getEnv("residenceStat"), dateConverter(envManager.getEnv("dob")), envManager.getEnv("gender"));
 
             envManager.updateEnv("applicantType", resp.applicantType.applicantTypeCode);
-        } catch (ErrorApplicantType ex) {
+        } catch (ApplicantTypeException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
@@ -66,37 +68,5 @@ public class ApplicantType {
         String outputDateStr = combinedDateTime.format(outputFormatter);
 
         return outputDateStr;
-    }
-}
-
-class ResponseDataApplicantType {
-    public String id;
-    public String version;
-    public String responsetime;
-    public MetaDataApplicantType[] metadata; // Can be null as specified
-    public ResponseDetailsApplicantType response;
-    public ErrorsApplicantType[] errors; // Can be null as specified
-}
-
-class MetaDataApplicantType {
-    //can be null
-}
-
-class ResponseDetailsApplicantType {
-    public ApplicantTypeVal applicantType;
-}
-
-class ApplicantTypeVal {
-    public String applicantTypeCode;
-}
-
-class ErrorsApplicantType {
-    public String errorCode;
-    public String message;
-}
-  
-class ErrorApplicantType extends Exception {
-    public ErrorApplicantType (ResponseDataApplicantType result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

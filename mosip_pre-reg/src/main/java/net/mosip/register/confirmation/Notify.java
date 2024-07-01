@@ -10,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.confirmation.notify.*;
+
 import okhttp3.*;
 
 public class Notify {
@@ -17,7 +19,7 @@ public class Notify {
         getNotif(envManager.getEnv("applicationId"));
     }
 
-    public static ResponseDetailsNotif getNotif_call(String auth, String name, String applicationId, String date, String appointmentTime, String phone, String email, String filePath) throws IOException, ErrorNotif {
+    public static ResponseDetailsNotif getNotif_call(String auth, String name, String applicationId, String date, String appointmentTime, String phone, String email, String filePath) throws IOException, NotifyException {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -47,7 +49,7 @@ public class Notify {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorNotif(result);
+            throw new NotifyException(result);
         }
     }
 
@@ -80,32 +82,9 @@ public class Notify {
 
             System.out.println(resp.message);
             System.out.println("------------------------------");
-        } catch (ErrorNotif ex) {
+        } catch (NotifyException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataNotif {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetailsNotif response;
-    public ErrorsNotif[] errors;
-}
-
-class ResponseDetailsNotif {
-    public String message;
-}
-
-class ErrorsNotif {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorNotif extends Exception {
-    public ErrorNotif (ResponseDataNotif result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

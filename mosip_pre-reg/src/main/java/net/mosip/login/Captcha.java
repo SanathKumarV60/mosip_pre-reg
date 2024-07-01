@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.login.captcha.*;
 
 import okhttp3.*;
 
@@ -31,13 +32,13 @@ public class Captcha {
             } else {
                 envManager.updateEnv("auth", response);
             }
-        } catch (Error | HeaderError e) {
+        } catch (CaptchaError | CaptchaHeaderError e) {
             System.err.println(e.getMessage());
             System.out.println("------------------------------");
         }
     }
 
-    public static String sendOtpWithCaptcha(String userId) throws IOException, Error, HeaderError {
+    public static String sendOtpWithCaptcha(String userId) throws IOException, CaptchaHeaderError, CaptchaError {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -56,7 +57,7 @@ public class Captcha {
         String responseBody = response.body().string();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        ResponseData result = objectMapper.readValue(responseBody, ResponseData.class);
+        ResponseDataCaptcha result = objectMapper.readValue(responseBody, ResponseDataCaptcha.class);
 
         if (result.errors == null) {
             if(response.header("Set-Cookie") != null){
@@ -64,40 +65,10 @@ public class Captcha {
                 return auth;
             }
             else{
-                throw new HeaderError();
+                throw new CaptchaHeaderError();
             }
         } else {
-                throw new Error(result);
+                throw new CaptchaError(result);
         }
-    }
-}
-
-class ResponseData {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetails response;
-    public Errors[] errors;
-}
-
-class ResponseDetails {
-    public String message;
-    public String status;
-}
-
-class Errors {
-    public String errorCode;
-    public String message;
-}
-
-class Error extends Exception {
-    public Error (ResponseData result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
-    }
-}
-
-class HeaderError extends Exception {
-    public HeaderError () {
-        super ("ERROR: NO HEADERS! LOGIN UNSUCCESSFUL!");
     }
 }

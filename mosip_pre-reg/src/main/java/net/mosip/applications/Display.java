@@ -3,6 +3,7 @@ package net.mosip.applications;
 import java.io.IOException;
 
 import net.mosip.envManager;
+import net.mosip.models.applications.*;
 
 public class Display {
     public static void main(String[] args) throws IOException {
@@ -13,7 +14,7 @@ public class Display {
 
     public static String display_applications() throws IOException {
         try {
-            ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
+            ResponseDetails resp = DisplayCall.display_applications(envManager.getEnv("auth"));
 
             int i = 0;
             int records = Integer.parseInt(resp.totalRecords);
@@ -50,7 +51,7 @@ public class Display {
             }
 
             return null;
-        } catch (Error ex){
+        } catch (ApplicationException ex){
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
             return "";
@@ -59,7 +60,7 @@ public class Display {
 
     public static int display_booked() throws IOException {
         try {
-            ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
+            ResponseDetails resp = DisplayCall.display_applications(envManager.getEnv("auth"));
             
             int count = 0;
             int i = 0;
@@ -97,7 +98,7 @@ public class Display {
             System.out.println("No. of Booked Records: " + String.valueOf(count));
             System.out.println("------------------------------");
             return count;
-        } catch (Error ex) {
+        } catch (ApplicationException ex) {
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
             return 0;
@@ -106,7 +107,7 @@ public class Display {
 
     public static void booked_details(String applicationId) throws IOException {
         try {
-            ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
+            ResponseDetails resp = DisplayCall.display_applications(envManager.getEnv("auth"));
 
             int i = 0;
             int records = Integer.parseInt(resp.totalRecords);
@@ -145,7 +146,7 @@ public class Display {
                     i++;
                 }
             }
-        } catch (Error ex) {
+        } catch (ApplicationException ex) {
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }
@@ -153,7 +154,7 @@ public class Display {
 
     public static void updateEnvCancel(String applicationId) throws IOException {
         try{
-            ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
+            ResponseDetails resp = DisplayCall.display_applications(envManager.getEnv("auth"));
 
             int i = 0;
             int records = Integer.parseInt(resp.totalRecords);
@@ -167,7 +168,7 @@ public class Display {
                 }
                 i++;
             }
-        } catch (Error ex) {
+        } catch (ApplicationException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
@@ -175,7 +176,7 @@ public class Display {
 
     public static void display_no_doc() throws IOException {
         try {
-            ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
+            ResponseDetails resp = DisplayCall.display_applications(envManager.getEnv("auth"));
 
             int count = 0;
             int i = 0;
@@ -193,7 +194,7 @@ public class Display {
             }
             System.out.println("No. of records with no documents: " + String.valueOf(count));
             System.out.println("------------------------------");
-        } catch (Error ex) {
+        } catch (ApplicationException ex) {
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }
@@ -201,7 +202,7 @@ public class Display {
     
     public static void display_not_booked() throws IOException {
         try {
-            ResponseDetails resp = DisplayCalls.display_applications(envManager.getEnv("auth"));
+            ResponseDetails resp = DisplayCall.display_applications(envManager.getEnv("auth"));
 
             int count = 0;
             int i = 0;
@@ -220,7 +221,7 @@ public class Display {
             }
             System.out.println("No. of not booked records: " + String.valueOf(count));
             System.out.println("------------------------------");
-        } catch (Error ex) {
+        } catch (ApplicationException ex) {
             System.out.println(ex.getMessage());
             System.out.println("------------------------------");
         }

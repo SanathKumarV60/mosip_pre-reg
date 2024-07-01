@@ -6,6 +6,8 @@ import java.io.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.*;
+import net.mosip.models.register.demographic.city.*;
+
 import net.mosip.envManager;
 
 public class City {
@@ -13,7 +15,7 @@ public class City {
         getCity();
     }
 
-    public static ResponseDetailsCity getCity_call(String auth, String province) throws IOException, ErrorCity {
+    public static ResponseDetailsCity getCity_call(String auth, String province) throws IOException, CityException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -31,7 +33,7 @@ public class City {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorCity(result);
+            throw new CityException(result);
         }
     }
 
@@ -62,47 +64,9 @@ public class City {
                     break;
                 }
             }
-        } catch (ErrorCity ex) {
+        } catch (CityException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataCity {
-    public String id;
-    public String version;
-    public String responsetime;
-    public MetadataCity metadata;
-    public ResponseDetailsCity response;
-    public ErrorsCity[] errors;
-}
-
-class ResponseDetailsCity {
-    public LocationsCity[] locations;
-}
-
-class MetadataCity {
-    //Empty
-}
-
-class ErrorsCity {
-    public String errorCode;
-    public String message;
-}
-
-class LocationsCity {
-    public String code;
-    public String name;
-    public int hierarchyLevel;
-    public String hierarchyName;
-    public String parentLocCode;
-    public String langCode;
-    public boolean isActive;
-}
-
-class ErrorCity extends Exception {
-    public ErrorCity (ResponseDataCity result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

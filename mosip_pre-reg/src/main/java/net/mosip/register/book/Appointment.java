@@ -8,6 +8,8 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.book.appointment.*;
+
 import okhttp3.*;
 
 public class Appointment {
@@ -15,7 +17,7 @@ public class Appointment {
         getAppointment(envManager.getEnv("applicationId"));
     }
 
-    public static ResponseDetailsAppoint getAppointment_call(String auth, String applicationId, String regCenterId, String date, String fromTime, String toTime) throws IOException, ErrorAppoint {
+    public static ResponseDetailsAppoint getAppointment_call(String auth, String applicationId, String regCenterId, String date, String fromTime, String toTime) throws IOException, AppointException {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -41,7 +43,7 @@ public class Appointment {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorAppoint(result);
+            throw new AppointException(result);
         }
     }
 
@@ -55,36 +57,9 @@ public class Appointment {
             System.out.println("From: " + envManager.getEnv("fromTime"));
             System.out.println("To: " + envManager.getEnv("toTime"));
             System.out.println("------------------------------");
-        } catch (ErrorAppoint ex) {
+        } catch (AppointException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataAppoint {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetailsAppoint response;
-    public ErrorsAppoint[] errors;
-}
-
-class ResponseDetailsAppoint {
-    public BookingStatusResponse[] bookingStatusResponse;
-}
-
-class BookingStatusResponse {
-    public String bookingMessage;
-}
-
-class ErrorsAppoint {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorAppoint extends Exception {
-    public ErrorAppoint (ResponseDataAppoint result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

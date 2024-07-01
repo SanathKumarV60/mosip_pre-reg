@@ -8,6 +8,8 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.confirmation.generateQR.*;
+
 import okhttp3.*;
 
 public class GenerateQR {
@@ -15,7 +17,7 @@ public class GenerateQR {
         generate(envManager.getEnv("applicationId"));
     }
 
-    public static ResponseDetailsQR generate_call(String auth, String applicationId) throws IOException, ErrorQR {
+    public static ResponseDetailsQR generate_call(String auth, String applicationId) throws IOException, QRException {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -41,7 +43,7 @@ public class GenerateQR {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorQR(result);
+            throw new QRException(result);
         }
     }
 
@@ -50,33 +52,9 @@ public class GenerateQR {
             ResponseDetailsQR resp = generate_call(envManager.getEnv("auth"), applicationId);
 
             System.out.println("QR Code String: " + resp.qrcode);
-        } catch (ErrorQR ex) {
+        } catch (QRException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataQR {
-    public String id;
-    public String version;
-    public String responsetime;
-    public String metadata;
-    public ResponseDetailsQR response;
-    public ErrorsQR[] errors;
-}
-
-class ResponseDetailsQR {
-    public String qrcode;
-}
-
-class ErrorsQR {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorQR extends Exception {
-    public ErrorQR (ResponseDataQR result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

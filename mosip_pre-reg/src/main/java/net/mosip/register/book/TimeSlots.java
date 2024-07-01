@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.book.timeSlots.*;
+
 import okhttp3.*;
 
 public class TimeSlots {
@@ -14,7 +16,7 @@ public class TimeSlots {
         getSlots();
     }
 
-    public static ResponseDetailsSlots getSlots_call(String auth, String regCenterId) throws IOException, ErrorSlots {
+    public static ResponseDetailsSlots getSlots_call(String auth, String regCenterId) throws IOException, SlotsException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -32,7 +34,7 @@ public class TimeSlots {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorSlots(result);
+            throw new SlotsException(result);
         }
     }
 
@@ -103,46 +105,9 @@ public class TimeSlots {
                 }
             }
 
-        } catch (ErrorSlots ex) {
+        } catch (SlotsException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataSlots {
-    public String id;
-    public String version;
-    public String responsetime;
-    public String metadata;
-    public ResponseDetailsSlots response;
-    public ErrorsSlots[] errors;
-}
-
-class ResponseDetailsSlots {
-    public String regCenterId;
-    public CenterDetails[] centerDetails;
-}
-
-class CenterDetails {
-    public String date;
-    public Slots[] timeSlots;
-    public boolean holiday;
-}
-
-class Slots {
-    public String fromTime;
-    public String toTime;
-    public int availability;
-}
-
-class ErrorsSlots {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorSlots extends Exception {
-    public ErrorSlots (ResponseDataSlots result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

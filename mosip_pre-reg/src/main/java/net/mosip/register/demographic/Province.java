@@ -6,6 +6,8 @@ import java.io.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.*;
+import net.mosip.models.register.demographic.province.*;
+
 import net.mosip.envManager;
 
 public class Province {
@@ -13,7 +15,7 @@ public class Province {
         getProvince();
     }
 
-    public static ResponseDetailsProvince getProvince_call(String auth, String region) throws IOException, ErrorProvince {
+    public static ResponseDetailsProvince getProvince_call(String auth, String region) throws IOException, ProvinceException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -32,7 +34,7 @@ public class Province {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorProvince(result);
+            throw new ProvinceException(result);
         }
     }
 
@@ -61,47 +63,9 @@ public class Province {
                 }
             }
 
-        } catch (ErrorProvince ex) {
+        } catch (ProvinceException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataProvince {
-    public String id;
-    public String version;
-    public String responsetime;
-    public MetadataProvince metadata;
-    public ResponseDetailsProvince response;
-    public ErrorsProvince[] errors;
-}
-
-class ResponseDetailsProvince {
-    public LocationsProvince[] locations;
-}
-
-class MetadataProvince {
-    //Empty
-}
-
-class ErrorsProvince {
-    public String errorCode;
-    public String message;
-}
-
-class LocationsProvince {
-    public String code;
-    public String name;
-    public int hierarchyLevel;
-    public String hierarchyName;
-    public String parentLocCode;
-    public String langCode;
-    public boolean isActive;
-}
-
-class ErrorProvince extends Exception {
-    public ErrorProvince (ResponseDataProvince result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

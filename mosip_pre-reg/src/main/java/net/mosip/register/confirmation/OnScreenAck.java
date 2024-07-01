@@ -6,6 +6,8 @@ import java.io.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.confirmation.onScreenAck.*;
+
 import okhttp3.*;
 
 public class OnScreenAck {
@@ -13,7 +15,7 @@ public class OnScreenAck {
         getAck();
     }
 
-    public static ResponseDetailsAck getAck_call(String auth) throws IOException, ErrorAck {
+    public static ResponseDetailsAck getAck_call(String auth) throws IOException, AckException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -31,7 +33,7 @@ public class OnScreenAck {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorAck(result);
+            throw new AckException(result);
         }
     }
 
@@ -57,47 +59,9 @@ public class OnScreenAck {
                     System.out.println("------------------------------");
                 }
             }
-        } catch (ErrorAck ex) {
+        } catch (AckException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataAck {
-    public String id;
-    public String version;
-    public String responsetime;
-    public String[] metadata;
-    public ResponseDetailsAck response;
-    public ErrorsAck[] errors;
-}
-
-class ResponseDetailsAck {
-    public Templates[] templates;
-}
-
-class Templates {
-    public String id;
-    public String name;
-    public String description;
-    public String fileFormatCode;
-    public String model;
-    public String fileText;
-    public String moduleId;
-    public String moduleName;
-    public String templateTypeCode;
-    public String langCode;
-    public boolean isActive;
-}
-
-class ErrorsAck {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorAck extends Exception {
-    public ErrorAck (ResponseDataAck result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

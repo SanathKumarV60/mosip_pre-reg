@@ -6,6 +6,8 @@ import java.io.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.*;
+import net.mosip.models.register.demographic.pincode.*;
+
 import net.mosip.envManager;
 
 public class Pincode {
@@ -13,7 +15,7 @@ public class Pincode {
         getPin();
     }
 
-    public static ResponseDetailsPin getPin_call(String auth, String zone) throws IOException, ErrorPin {
+    public static ResponseDetailsPin getPin_call(String auth, String zone) throws IOException, PincodeException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -31,7 +33,7 @@ public class Pincode {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorPin(result);
+            throw new PincodeException(result);
         }
     }
 
@@ -60,47 +62,9 @@ public class Pincode {
                     break;
                 }
             }
-        } catch (ErrorPin ex) {
+        } catch (PincodeException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataPin {
-    public String id;
-    public String version;
-    public String responsetime;
-    public MetadataPin metadata;
-    public ResponseDetailsPin response;
-    public ErrorsPin[] errors;
-}
-
-class ResponseDetailsPin {
-    public LocationsPin[] locations;
-}
-
-class MetadataPin {
-    //Empty
-}
-
-class ErrorsPin {
-    public String errorCode;
-    public String message;
-}
-
-class LocationsPin {
-    public String code;
-    public String name;
-    public int hierarchyLevel;
-    public String hierarchyName;
-    public String parentLocCode;
-    public String langCode;
-    public boolean isActive;
-}
-
-class ErrorPin extends Exception {
-    public ErrorPin (ResponseDataPin result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

@@ -6,6 +6,8 @@ import java.io.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.*;
+import net.mosip.models.register.demographic.region.*;
+
 import net.mosip.envManager;
 
 public class Region {
@@ -13,7 +15,7 @@ public class Region {
         getRegion();
     }
 
-    public static ResponseDetailsRegion getRegion_call(String auth) throws IOException, ErrorRegion {
+    public static ResponseDetailsRegion getRegion_call(String auth) throws IOException, RegionException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -31,7 +33,7 @@ public class Region {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorRegion(result);
+            throw new RegionException(result);
         }
     }
 
@@ -60,47 +62,9 @@ public class Region {
                     break;
                 }
             }
-        } catch (ErrorRegion ex) {
+        } catch (RegionException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
-    }
-}
-
-class ResponseDataRegion {
-    public String id;
-    public String version;
-    public String responsetime;
-    public MetadataRegion metadata;
-    public ResponseDetailsRegion response;
-    public ErrorsRegion[] errors;
-}
-
-class ResponseDetailsRegion {
-    public LocationsRegion[] locations;
-}
-
-class MetadataRegion {
-    //Empty
-}
-
-class ErrorsRegion {
-    public String errorCode;
-    public String message;
-}
-
-class LocationsRegion {
-    public String code;
-    public String name;
-    public int hierarchyLevel;
-    public String hierarchyName;
-    public String parentLocCode;
-    public String langCode;
-    public boolean isActive;
-}
-
-class ErrorRegion extends Exception {
-    public ErrorRegion (ResponseDataRegion result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

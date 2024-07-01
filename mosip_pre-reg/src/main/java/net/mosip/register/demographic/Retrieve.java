@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.*;
 import net.mosip.envManager;
+import net.mosip.models.register.demographic.retrieve.*;
 
 import net.mosip.register.book.RunBooking;
 import net.mosip.register.book.CenterDetailsCheck;
@@ -19,7 +20,7 @@ public class Retrieve {
         updateAllEnv(envManager.getEnv("applicationId"));
     }
 
-    public static ResponseDetailsRetrieve retrieve_call(String auth, String applicationId) throws IOException, ErrorRetrieve {
+    public static ResponseDetailsRetrieve retrieve_call(String auth, String applicationId) throws IOException, RetrieveException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -37,7 +38,7 @@ public class Retrieve {
         if(result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorRetrieve(result);
+            throw new RetrieveException(result);
         }
     }
 
@@ -60,7 +61,7 @@ public class Retrieve {
             envManager.updateEnv("status", resp.statusCode);
             envManager.updateEnv("residenceStat", resp.demographicDetails.identity.residenceStatus[0].value);
             
-        } catch (ErrorRetrieve ex) {
+        } catch (RetrieveException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
@@ -106,7 +107,7 @@ public class Retrieve {
 
             next(resp.preRegistrationId);
 
-        } catch (ErrorRetrieve ex) {
+        } catch (RetrieveException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
@@ -148,95 +149,5 @@ public class Retrieve {
                     System.out.println("------------------------------");
             }
         }
-    }
-}
-
-class ResponseDataRetrieve {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetailsRetrieve response;
-    public ErrorsRetrieve[] errors;
-}
-
-class ResponseDetailsRetrieve {
-    public String preRegistrationId;
-    public String createdBy;
-    public String createdDateTime;
-    public String updatedBy;
-    public String updatedDateTime;
-    public String statusCode;
-    public String langCode;
-    public DemographicDetailsRetrieve demographicDetails;
-}
-
-class DemographicDetailsRetrieve {
-    public IdentityRetrieve identity;
-}
-
-class IdentityRetrieve {
-    public GenderRetrieve[] gender;
-    public CityRetrieve[] city;
-    public String postalCode;
-    public NameRetrieve[] fullName;
-    public String dateOfBirth;
-    public double IDSchemaVersion;
-    public ProvinceRetrieve[] province;
-    public ZoneRetrieve[] zone;
-    public String phone;
-    public AddressRetrieve[] addressLine1;
-    public ResidenceRetrieve[] residenceStatus;
-    public RegionRetrieve[] region;
-    public String email;
-}
-
-class GenderRetrieve {
-    public String language;
-    public String value;
-}
-
-class CityRetrieve {
-    public String language;
-    public String value;
-}
-
-class NameRetrieve {
-    public String language;
-    public String value;
-}
-
-class ProvinceRetrieve {
-    public String language;
-    public String value;
-}
-
-class ZoneRetrieve {
-    public String language;
-    public String value;
-}
-
-class AddressRetrieve {
-    public String language;
-    public String value;
-}
-
-class ResidenceRetrieve {
-    public String language;
-    public String value;
-}
-
-class RegionRetrieve {
-    public String language;
-    public String value;
-}
-
-class ErrorsRetrieve {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorRetrieve extends Exception {
-    public ErrorRetrieve (ResponseDataRetrieve result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

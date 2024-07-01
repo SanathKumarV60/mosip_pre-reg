@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
 import net.mosip.register.demographic.Retrieve;
+import net.mosip.models.register.upload.documentFetch.*;
+
 import okhttp3.*;
 
 public class DocumentFetch {
@@ -13,7 +15,7 @@ public class DocumentFetch {
         docFetch(envManager.getEnv("applicationId"));
     }
 
-    public static ResponseDetailsFetch docFetch_call(String auth, String applicationId) throws IOException, ErrorFetch {
+    public static ResponseDetailsFetch docFetch_call(String auth, String applicationId) throws IOException, FetchException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -36,7 +38,7 @@ public class DocumentFetch {
             RunUpload.runUpload(applicationId); 
             return null;
         } else {
-            throw new ErrorFetch(result);
+            throw new FetchException(result);
         }
     }
 
@@ -60,42 +62,10 @@ public class DocumentFetch {
                 System.out.println("------------------------------");
             }
             return null;
-        } catch (ErrorFetch ex) {
+        } catch (FetchException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
             return "";
         }
-    }
-}
-
-class ResponseDataFetch {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetailsFetch response;
-    public ErrorsFetch[] errors;
-}
-
-class ResponseDetailsFetch {
-    public DocumentsMetaDataFetch[] documentsMetaData;
-}
-
-class DocumentsMetaDataFetch {
-    public String docName;
-    public String documentId;
-    public String docCatCode;
-    public String docTypCode;
-    public String langCode;
-    public String docRefId;
-}
-
-class ErrorsFetch {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorFetch extends Exception {
-    public ErrorFetch (ResponseDataFetch result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }

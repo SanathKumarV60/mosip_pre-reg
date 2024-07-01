@@ -11,6 +11,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.mosip.envManager;
+import net.mosip.models.register.upload.uploadDoc.*;
+
 import okhttp3.*;
 
 public class UploadDoc {
@@ -18,7 +20,7 @@ public class UploadDoc {
         
     }
 
-    public static ResponseDetailsUpload uploadDoc_call(String auth, String doc, String type, String refId, String fileName, String filePath, String applicationId) throws IOException, ErrorUpload {
+    public static ResponseDetailsUpload uploadDoc_call(String auth, String doc, String type, String refId, String fileName, String filePath, String applicationId) throws IOException, UploadException {
         OffsetDateTime now = OffsetDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         OffsetDateTime gmtTime = now.withOffsetSameInstant(ZoneOffset.UTC);
@@ -49,7 +51,7 @@ public class UploadDoc {
             if (result.errors == null) {
                 return result.response;
             } else {
-                throw new ErrorUpload(result);
+                throw new UploadException(result);
             }
         } catch (JsonParseException e) {
             System.err.println("ERROR: File Too Large!");
@@ -84,7 +86,7 @@ public class UploadDoc {
             System.out.println("------------------------------");
             
             return null;
-        } catch (ErrorUpload ex) {
+        } catch (UploadException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
             return "";
@@ -102,33 +104,4 @@ public class UploadDoc {
         }
         return filePath.substring(dotIndex + 1);
       }
-}
-
-class ResponseDataUpload {
-    public String id;
-    public String version;
-    public String responsetime;
-    public ResponseDetailsUpload response;
-    public ErrorsUpload[] errors;
-}
-
-class ResponseDetailsUpload {
-    public String preRegistrationId;
-    public String docId;
-    public String docName;
-    public String docRefId;
-    public String docCatCode;
-    public String docTypCode;
-    public String docFileFormat;
-}
-
-class ErrorsUpload {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorUpload extends Exception {
-    public ErrorUpload (ResponseDataUpload result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
-    }
 }

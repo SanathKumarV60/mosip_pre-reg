@@ -6,6 +6,8 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.*;
+import net.mosip.models.register.demographic.consent.*;
+
 import net.mosip.envManager;
 
 public class Consent {
@@ -14,7 +16,7 @@ public class Consent {
         System.out.println(response);
     }
 
-    public static ResponseDetailsConsent giveConsent_call(String auth) throws IOException, ErrorConsent {
+    public static ResponseDetailsConsent giveConsent_call(String auth) throws IOException, ConsentException {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         Request request = new Request.Builder()
@@ -32,7 +34,7 @@ public class Consent {
         if (result.errors == null) {
             return result.response;
         } else {
-            throw new ErrorConsent(result);
+            throw new ConsentException(result);
         }
     }
 
@@ -62,7 +64,7 @@ public class Consent {
                     accept = getValidInput();
                 }
             }
-        } catch (ErrorConsent ex) {
+        } catch (ConsentException ex) {
             System.err.println(ex.getMessage());
             System.out.println("------------------------------");
         }
@@ -82,47 +84,5 @@ public class Consent {
         } while (!accept.equals("y") && !accept.equals("Y") && !accept.equals("n") && !accept.equals("N"));
     
         return accept;
-    }
-}
-
-class ResponseDataConsent {
-    public String id;
-    public String version;
-    public String responsetime;
-    public MetadataConsent[] metadata;
-    public ResponseDetailsConsent response;
-    public ErrorsConsent[] errors;
-}
-
-class ResponseDetailsConsent {
-    public TemplatesConsent[] templates;
-}
-
-class MetadataConsent {
-    //empty
-}
-
-class TemplatesConsent {
-    public String id;
-    public String name;
-    public String description;
-    public String fileFormatCode;
-    public String model;
-    public String fileText;
-    public String moduleId;
-    public String moduleName;
-    public String templateTypeCode;
-    public String langCode;
-    public boolean isActive;
-}
-
-class ErrorsConsent {
-    public String errorCode;
-    public String message;
-}
-
-class ErrorConsent extends Exception {
-    public ErrorConsent (ResponseDataConsent result) {
-        super ("ERROR: " + result.errors[0].errorCode + ": " + result.errors[0].message);
     }
 }
